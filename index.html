@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pharmacy POS</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <h1>Pharmacy POS</h1>
+    <div>
+        <h2>Add Customer</h2>
+        <input id="customerName" placeholder="Customer Name">
+        <button onclick="addCustomer()">Add</button>
+    </div>
+    <div>
+        <h2>Add Product</h2>
+        <input id="productName" placeholder="Product Name">
+        <input id="productPrice" placeholder="Price" type="number">
+        <input id="stock" placeholder="Stock" type="number">
+        <button onclick="addProduct()">Add</button>
+    </div>
+    <div>
+        <h2>Generate Invoice</h2>
+        <input id="invoiceCustomer" placeholder="Customer Name">
+        <textarea id="invoiceItems" placeholder='[{"name": "Med A", "price": 10, "quantity": 2}]'></textarea>
+        <input id="invoiceTotal" placeholder="Total Amount" type="number">
+        <button onclick="generateInvoice()">Save Invoice</button>
+        <button onclick="printInvoice()">Print Invoice</button>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>
