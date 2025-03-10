@@ -2,7 +2,7 @@
   "name": "calcify",
   "version": "1.0.0",
   "description": "A pharmacy POS",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "start": "electron --no-sandbox .",
     "test": "echo \"Error: no test specified\" && exit 1"
