@@ -1,0 +1,30 @@
+{
+  "name": "calcify",
+  "version": "1.0.0",
+  "description": "A pharmacy POS",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron --no-sandbox .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Moniaar/Calcify.git"
+  },
+  "author": "Omnia Ahmed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Moniaar/Calcify/issues"
+  },
+  "homepage": "https://github.com/Moniaar/Calcify#readme",
+  "devDependencies": {
+    "electron": "^35.0.1",
+    "electron-builder": "^25.1.8",
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+    "electron-store": "^10.0.1",
+    "pdfkit": "^0.16.0",
+    "sqlite3": "^5.1.7"
+  }
+}
