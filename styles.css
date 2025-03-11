@@ -1,5 +1,50 @@
+body { 
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
 
-body { font-family: Arial, sans-serif; padding: 20px; }
-h1 { color: #333; }
-input, textarea { margin: 5px; padding: 5px; width: 100%; }
-button { padding: 5px 10px; margin: 5px; }
+h1 {
+    margin: 0;
+    padding: 20px;
+    background: #f3d0d0;
+    color: #1c1c1c;
+    text-align: center;
+    width: 100%;
+}
+
+h2 .stock-alert {
+    color: #1c1c1c;
+    font-size: 20px;
+    margin: 0;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.sidebar { width: 200px; background: #333; color: #fff; padding: 20px; height: 100vh; }
+.sidebar h2 { color: #fff; }
+.sidebar button { display: block; width: 100%; padding: 10px; margin-top: 10px; background: #444; color: white; border: none; cursor: pointer; }
+.sidebar button:hover { background: #555; }
+.content { flex: 1; padding: 20px; }
+.stats { 
+    display: flex;
+    gap: 50px;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.card {
+    padding: 20px;
+    background: #f4f4f4;
+    border-radius: 5px;
+    align-items: center;
+}
+
+
+ul { list-style: none; padding: 0; }
+form { margin-top: 20px; }
+input { padding: 10px; margin-right: 10px; }
+
+
+button { padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+button:hover { background: #0056b3; }

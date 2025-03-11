@@ -1,31 +1,32 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Pharmacy POS</title>
+    <title>Pharmacy POS Dashboard</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-    <h1>Pharmacy POS</h1>
-    <div>
+    <div class="sidebar">
+        <h2>Pharmacy POS</h2>
+        <button onclick="fetchDashboardData()">Dashboard</button>
+        <button onclick="navigateTo('customers.html')">Customers</button>
+        <button onclick="navigateTo('products.html')">Products</button>
+        <button onclick="navigateTo('invoices.html')">Invoices</button>
+    </div>
+    <div class="content">
+        <h1>Dashboard</h1>
+        <div class="stats">
+            <div class="card">Customers: <span id="totalCustomers">0</span></div>
+            <div class="card">Products: <span id="totalProducts">0</span></div>
+            <div class="card">Total Sales: $<span id="totalSales">0</span></div>
+        </div>
+        <h2 class="stock-alert">Low Stock Alerts</h2>
+        <ul id="lowStockList"></ul>
+        
         <h2>Add Customer</h2>
-        <input id="customerName" placeholder="Customer Name">
-        <button onclick="addCustomer()">Add</button>
-    </div>
-    <div>
-        <h2>Add Product</h2>
-        <input id="productName" placeholder="Product Name">
-        <input id="productPrice" placeholder="Price" type="number">
-        <input id="stock" placeholder="Stock" type="number">
-        <button onclick="addProduct()">Add</button>
-    </div>
-    <div>
-        <h2>Generate Invoice</h2>
-        <input id="invoiceCustomer" placeholder="Customer Name">
-        <textarea id="invoiceItems" placeholder='[{"name": "Med A", "price": 10, "quantity": 2}]'></textarea>
-        <input id="invoiceTotal" placeholder="Total Amount" type="number">
-        <button onclick="generateInvoice()">Save Invoice</button>
-        <button onclick="printInvoice()">Print Invoice</button>
+        <form id="addCustomerForm">
+            <input type="text" id="customerName" placeholder="Customer Name" required>
+            <button type="submit">Add Customer</button>
+        </form>
     </div>
     <script src="renderer.js"></script>
 </body>
