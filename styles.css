@@ -1,7 +1,6 @@
 body { 
     display: flex;
     margin: 0;
-    padding: 0;
 }
 
 h1 {
@@ -12,10 +11,17 @@ h1 {
     width: 100%;
 }
 
+div.content {
+    flex: 1;
+    padding: 80px;
+    background: #f9f9f9;
+}
+
 h2 .stock-alert {
     color: #1c1c1c;
     font-size: 20px;
     margin: 0;
+    padding-top: 10px;
     font-family: 'Times New Roman', Times, serif;
 }
 
@@ -24,17 +30,18 @@ h2 .stock-alert {
 .sidebar button { display: block; width: 100%; padding: 10px; margin-top: 10px; background: #444; color: white; border: none; cursor: pointer; }
 .sidebar button:hover { background: #555; }
 .content { flex: 1; padding: 20px; }
-.stats { 
+
+div.stats { 
     display: flex;
     gap: 50px;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 85px;
     align-items: center;
 }
 
 .card {
     padding: 20px;
-    background: #eceaea;
+    background: #eceaea52;
     border-radius: 3px;
     align-items: center;
 }
