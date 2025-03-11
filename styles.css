@@ -6,8 +6,7 @@ body {
 
 h1 {
     margin: 0;
-    padding: 20px;
-    background: #f3d0d0;
+    padding: 40px;
     color: #1c1c1c;
     text-align: center;
     width: 100%;
@@ -35,8 +34,8 @@ h2 .stock-alert {
 
 .card {
     padding: 20px;
-    background: #f4f4f4;
-    border-radius: 5px;
+    background: #eceaea;
+    border-radius: 3px;
     align-items: center;
 }
 

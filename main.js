@@ -61,6 +61,16 @@ ipcMain.handle('fetch-invoices', async () => {
     });
 });
 
+ipcMain.handle('fetch-customers', async () => {
+    return new Promise((resolve, reject) => {
+        db.all("SELECT name, company_name, phone_number, invoice_type, invoice_number FROM customers", [], (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
+    });
+});
+
+
 ipcMain.on('add-customer', (event, name) => {
     db.run("INSERT INTO customers (name) VALUES (?)", [name]);
 });
