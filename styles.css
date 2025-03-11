@@ -25,8 +25,10 @@ h2 .stock-alert {
     font-family: 'Times New Roman', Times, serif;
 }
 
+/* Navgation section */
+
 .sidebar { width: 200px; background: #333; color: #fff; padding: 20px; height: 100vh; }
-.sidebar h2 { color: #fff; }
+.sidebar h2 { color: #e6e4e4; }
 .sidebar button { display: block; width: 100%; padding: 10px; margin-top: 10px; background: #444; color: white; border: none; cursor: pointer; }
 .sidebar button:hover { background: #555; }
 .content { flex: 1; padding: 20px; }
@@ -39,6 +41,14 @@ div.stats {
     align-items: center;
 }
 
+div.alert {
+    padding: 20px;
+    background: #f8d7da;
+    color: #721c24;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
 .card {
     padding: 20px;
     background: #eceaea52;
@@ -48,9 +58,21 @@ div.stats {
 
 
 ul { list-style: none; padding: 0; }
-form { margin-top: 20px; }
+form {
+    margin-top: 30px;
+    display: flex;
+}
+
+
 input { padding: 10px; margin-right: 10px; }
 
 
-button { padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+button {
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
 button:hover { background: #0056b3; }

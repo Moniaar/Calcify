@@ -30,7 +30,7 @@ app.whenReady().then(() => {
             contextIsolation: true,
         }
     });
-    mainWindow.loadFile('index.html');
+    mainWindow.loadFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // IPC Handlers
