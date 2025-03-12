@@ -1,5 +1,5 @@
 # Calcify
-Pharmacy POS system using Electron.js and sqlite3!. 
+Pharmacy POS system using Electron.js for frontend and sqlite3 for backend!. 
 
 ---
 
