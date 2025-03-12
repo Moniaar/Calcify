@@ -2,92 +2,79 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
+const createBackend = require('./database/server.js');
 
 // Database setup
 const dbPath = path.join(__dirname, 'database', 'setup.db');
-const db = new sqlite3.Database(dbPath);
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('Error connecting to database:', err);
+  } else {
+    console.log('Connected to SQLite database');
+  }
+});
 
 function initializeDatabase() {
-    const sqlPath = path.join(__dirname, 'database', 'setup.db');
-    const sql = fs.readFileSync(sqlPath, 'utf-8');
+  const sqlPath = path.join(__dirname, 'database', 'setup.sql'); // Assuming you have a setup.sql file
+  const sql = fs.readFileSync(sqlPath, 'utf-8');
 
-    db.exec(sql, (err) => {
-        if (err) {
-            console.error("Error initializing database:", err);
-        } else {
-            console.log("Database initialized successfully.");
-        }
-    });
+  db.exec(sql, (err) => {
+    if (err) {
+      console.error('Error initializing database:', err);
+    } else {
+      console.log('Database initialized successfully');
+    }
+  });
 }
 
+// Initialize backend with the db instance
+const backend = createBackend(db);
+
 // App setup
-
 app.whenReady().then(() => {
-    initializeDatabase();
+  initializeDatabase();
 
-    let mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            contextIsolation: true,
-        }
-    });
-    mainWindow.loadFile('public/index.html');
+  let mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false, // Added for security
+    },
+  });
+  mainWindow.loadFile('public/index.html');
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+  db.close((err) => {
+    if (err) console.error('Error closing database:', err);
+    else console.log('Database closed');
+  });
+  if (process.platform !== 'darwin') app.quit();
 });
-// IPC Handlers
 
+// IPC Handlers
 ipcMain.handle('fetch-customers', async () => {
-    return new Promise((resolve, reject) => {
-        db.all("SELECT * FROM customers", [], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+  return backend.fetchCustomers();
 });
 
 ipcMain.handle('fetch-products', async () => {
-    return new Promise((resolve, reject) => {
-        db.all("SELECT * FROM products", [], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+  return backend.fetchProducts();
 });
 
 ipcMain.handle('fetch-invoices', async () => {
-    return new Promise((resolve, reject) => {
-        db.all("SELECT * FROM invoices", [], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+  return backend.fetchInvoices();
 });
 
-ipcMain.handle('fetch-customers', async () => {
-    return new Promise((resolve, reject) => {
-        db.all("SELECT name, company_name, phone_number, invoice_type, invoice_number FROM customers", [], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+ipcMain.handle('add-customer', async (event, name) => {
+  return backend.addCustomer(name);
 });
 
-
-ipcMain.on('add-customer', (event, name) => {
-    db.run("INSERT INTO customers (name) VALUES (?)", [name]);
+ipcMain.handle('add-product', async (event, product) => {
+  return backend.addProduct(product);
 });
 
-ipcMain.on('add-product', (event, product) => {
-    db.run("INSERT INTO products (name, price, stock) VALUES (?, ?, ?)", [product.name, product.price, product.stock]);
-});
-
-ipcMain.on('generate-invoice', (event, invoice) => {
-    db.run("INSERT INTO invoices (customer, items, total) VALUES (?, ?, ?)", [invoice.customer, JSON.stringify(invoice.items), invoice.total]);
+ipcMain.handle('generate-invoice', async (event, invoice) => {
+  return backend.generateInvoice(invoice);
 });

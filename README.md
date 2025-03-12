@@ -1,5 +1,5 @@
 # Calcify
-Pharmacy POS system using Electron.js for frontend and sqlite3 for backend!. 
+Pharmacy POS system using Electron.js for frontend and sqlite3 and Express for backend!. 
 
 ---
 
@@ -15,7 +15,7 @@ This project was designed to help a pharmacy track the following:
 ---
 ## Things I have learned while building with Electron
 
-
+1. Electron has 2 separate processes one for main and one is a renderer process. Main is based on node dealing with your computer hardware and need to be kept secure, the renderer one is for UI only. You need to debug seaperatly for each one.
 
 
 

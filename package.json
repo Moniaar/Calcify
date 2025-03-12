@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "electron-store": "^10.0.1",
+    "express": "^4.21.2",
     "pdfkit": "^0.16.0",
     "sqlite3": "^5.1.7"
   }
