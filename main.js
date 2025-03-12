@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
+// Database setup
 const dbPath = path.join(__dirname, 'database', 'setup.db');
 const db = new sqlite3.Database(dbPath);
 
@@ -19,6 +20,8 @@ function initializeDatabase() {
     });
 }
 
+// App setup
+
 app.whenReady().then(() => {
     initializeDatabase();
 
@@ -30,10 +33,16 @@ app.whenReady().then(() => {
             contextIsolation: true,
         }
     });
-    mainWindow.loadFile(path.join(__dirname, 'public', 'index.html'));
+    mainWindow.loadFile('public/index.html');
 });
 
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
+});
 // IPC Handlers
+
 ipcMain.handle('fetch-customers', async () => {
     return new Promise((resolve, reject) => {
         db.all("SELECT * FROM customers", [], (err, rows) => {
