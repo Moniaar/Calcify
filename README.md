@@ -12,6 +12,13 @@ This project was designed to help a pharmacy track the following:
 6. Medication database
 
 
+---
+## Things I have learned while building with Electron
+
+
+
+
+
 In next version I will update with the ability to backup automatically each 5min :). 
 
 
