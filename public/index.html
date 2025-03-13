@@ -537,36 +537,35 @@
                         </div>
                       </div>
 
-                      <div class="col col-stats ms-3 ms-sm-0">
-                        <div class="numbers">
-                          <p class="card-category">Products</p>
-                          <button id="addProductBtn" class="btn btn-primary mt-3">Add Product</button>
+                      <div class="row">
+                        <div class="col col-stats ms-3 ms-sm-0">
+                          <div class="numbers">
+                            <p class="card-category">Products</p>
+                            <h4 class="card-title" id="productCount">0</h4>
+                          </div>
                         </div>
                       </div>
-                      <script>
-                        // Function to update product count
-                        function updateProductCount() {
-                          window.api.fetchProducts()
-                            .then((products) => {
-                              document.getElementById('productCount').textContent = products.length;
-                            })
-                            .catch((err) => console.error('Error fetching products:', err));
-                        }
-                    
-                        // Initial load of product count
-                        updateProductCount();
-                    
-                        // Open add product window
-                        document.getElementById('addProductBtn').addEventListener('click', () => {
-                          window.api.openAddProductWindow(); // We'll define this in preload.js
-                        });
-                    
-                        // Listen for product added event to update count
-                        window.api.onProductAdded(() => {
-                          updateProductCount();
-                        });
-                      </script>
+                      <button id="addProductBtn" class="btn btn-primary mt-3">Add Product</button>
+                      <button id="viewProductsBtn" class="btn btn-secondary mt-3 ms-2">View Product List</button>
                     </div>
+                  
+                    <script>
+                      function updateProductCount() {
+                        window.api.fetchProducts()
+                          .then((products) => {
+                            document.getElementById('productCount').textContent = products.length;
+                          })
+                          .catch((err) => console.error('Error fetching products:', err));
+                      }
+                      updateProductCount();
+                      document.getElementById('addProductBtn').addEventListener('click', () => {
+                        window.api.openAddProductWindow();
+                      });
+                      document.getElementById('viewProductsBtn').addEventListener('click', () => {
+                        window.api.openProductsTableWindow();
+                      });
+                      window.api.onProductAdded(() => updateProductCount());
+                    </script>
                   </div>
                 </div>
               </div>

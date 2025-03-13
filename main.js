@@ -2,35 +2,27 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
-const createBackend = require('./database/server.js'); // Adjust path if needed (e.g., './backend/index.js')
+const createBackend = require('./database/server.js'); // Adjust if needed
 
 // Database setup
 const dbPath = path.join(__dirname, 'database', 'setup.db');
 const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Error connecting to database:', err);
-  } else {
-    console.log('Connected to SQLite database');
-  }
+  if (err) console.error('Error connecting to database:', err);
+  else console.log('Connected to SQLite database');
 });
 
 function initializeDatabase() {
   const sqlPath = path.join(__dirname, 'database', 'setup.sql');
   const sql = fs.readFileSync(sqlPath, 'utf-8');
-
   db.exec(sql, (err) => {
-    if (err) {
-      console.error('Error initializing database:', err);
-    } else {
-      console.log('Database initialized successfully');
-    }
+    if (err) console.error('Error initializing database:', err);
+    else console.log('Database initialized successfully');
   });
 }
 
-// Initialize backend with the db instance
 const backend = createBackend(db);
 
-// Main window (declare outside to make it globally accessible)
+// Main window
 let mainWindow;
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -51,7 +43,7 @@ function createAddProductWindow() {
   addProductWindow = new BrowserWindow({
     width: 400,
     height: 300,
-    parent: mainWindow, // Links it to the main window
+    parent: mainWindow,
     modal: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -60,12 +52,25 @@ function createAddProductWindow() {
     },
   });
   addProductWindow.loadFile('public/add-product.html');
-  addProductWindow.on('closed', () => {
-    addProductWindow = null;
-  });
+  addProductWindow.on('closed', () => addProductWindow = null);
 }
 
-// App setup
+// Products table window
+let productsTableWindow;
+function createProductsTableWindow() {
+  productsTableWindow = new BrowserWindow({
+    width: 1000,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  productsTableWindow.loadFile('public/products-table.html');
+  productsTableWindow.on('closed', () => productsTableWindow = null);
+}
+
 app.whenReady().then(() => {
   initializeDatabase();
   createMainWindow();
@@ -80,32 +85,21 @@ app.on('window-all-closed', () => {
 });
 
 // IPC Handlers
-ipcMain.handle('fetch-customers', async () => {
-  return backend.fetchCustomers();
-});
-
-ipcMain.handle('fetch-products', async () => {
-  return backend.fetchProducts();
-});
-
-ipcMain.handle('fetch-invoices', async () => {
-  return backend.fetchInvoices();
-});
-
+ipcMain.handle('fetch-products', async () => backend.fetchProducts());
 ipcMain.handle('add-product', async (event, product) => {
   const result = await backend.addProduct(product);
   if (mainWindow) mainWindow.webContents.send('product-added');
+  if (productsTableWindow) productsTableWindow.webContents.send('product-added'); // Notify table window
   return result;
 });
-
 ipcMain.on('open-add-product-window', () => {
   if (!addProductWindow) createAddProductWindow();
 });
-
-ipcMain.handle('generate-invoice', async (event, invoice) => {
-  return backend.generateInvoice(invoice);
+ipcMain.on('open-products-table-window', () => {
+  if (!productsTableWindow) createProductsTableWindow();
 });
-
-ipcMain.handle('fetch-product-by-id', async (event, id) => {
-  return backend.fetchProductById(id);
-});
+// Other handlers...
+ipcMain.handle('fetch-customers', async () => backend.fetchCustomers());
+ipcMain.handle('fetch-invoices', async () => backend.fetchInvoices());
+ipcMain.handle('generate-invoice', async (event, invoice) => backend.generateInvoice(invoice));
+ipcMain.handle('fetch-product-by-id', async (event, id) => backend.fetchProductById(id));

@@ -11,4 +11,5 @@ contextBridge.exposeInMainWorld('api', {
   onProductAdded: (callback) => ipcRenderer.on('product-added', callback),
   generateInvoice: (invoice) => ipcRenderer.invoke('generate-invoice', invoice),
   fetchProductById: (id) => ipcRenderer.invoke('fetch-product-by-id', id),
+  openProductsTableWindow: () => ipcRenderer.send('open-products-table-window'),
 });
