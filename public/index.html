@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>POS Pharmacy system</title>
+    <title>Calcify</title>
     <meta
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"
@@ -68,6 +68,7 @@
               <i class="gg-more-vertical-alt"></i>
             </button>
           </div>
+
           <!-- End Logo Header -->
         </div>
         <div class="sidebar-wrapper scrollbar scrollbar-inner">
@@ -487,7 +488,8 @@
                         <div class="user-box">
                           <div class="u-text">
                             <h4>Jawaher</h4>
-                            <p class="text-muted">hello@example.com</p>
+                            <p class="text-muted">0900886072</p>
+                            <p class="text-muted">+249125877125</p>
                             <a
                               href="profile.html"
                               class="btn btn-xs btn-secondary btn-sm"
@@ -534,12 +536,36 @@
                           <i class="fas fa-users"></i>
                         </div>
                       </div>
+
                       <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
                           <p class="card-category">Products</p>
-                          <h4 class="card-title">1,294</h4>
+                          <button id="addProductBtn" class="btn btn-primary mt-3">Add Product</button>
                         </div>
                       </div>
+                      <script>
+                        // Function to update product count
+                        function updateProductCount() {
+                          window.api.fetchProducts()
+                            .then((products) => {
+                              document.getElementById('productCount').textContent = products.length;
+                            })
+                            .catch((err) => console.error('Error fetching products:', err));
+                        }
+                    
+                        // Initial load of product count
+                        updateProductCount();
+                    
+                        // Open add product window
+                        document.getElementById('addProductBtn').addEventListener('click', () => {
+                          window.api.openAddProductWindow(); // We'll define this in preload.js
+                        });
+                    
+                        // Listen for product added event to update count
+                        window.api.onProductAdded(() => {
+                          updateProductCount();
+                        });
+                      </script>
                     </div>
                   </div>
                 </div>

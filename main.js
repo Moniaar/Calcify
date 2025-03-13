@@ -34,7 +34,7 @@ const backend = createBackend(db);
 app.whenReady().then(() => {
   initializeDatabase();
 
-  let mainWindow = new BrowserWindow({
+let mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -46,6 +46,28 @@ app.whenReady().then(() => {
   mainWindow.loadFile('public/index.html');
 });
 
+
+// Add product window
+let addProductWindow;
+function createAddProductWindow() {
+  addProductWindow = new BrowserWindow({
+    width: 400,
+    height: 300,
+    parent: mainWindow, // Links it to the main window
+    modal: true, // Makes it a modal window
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  addProductWindow.loadFile('public/add-product.html'); // New HTML file
+  addProductWindow.on('closed', () => {
+    addProductWindow = null;
+  });
+}
+
+
 app.on('window-all-closed', () => {
   db.close((err) => {
     if (err) console.error('Error closing database:', err);
@@ -53,6 +75,8 @@ app.on('window-all-closed', () => {
   });
   if (process.platform !== 'darwin') app.quit();
 });
+
+fetchProductById: (id) => ipcRenderer.invoke('fetch-product-by-id', id),
 
 // IPC Handlers
 ipcMain.handle('fetch-customers', async () => {
@@ -67,14 +91,21 @@ ipcMain.handle('fetch-invoices', async () => {
   return backend.fetchInvoices();
 });
 
-ipcMain.handle('add-customer', async (event, name) => {
-  return backend.addCustomer(name);
+ipcMain.handle('add-product', async (event, product) => {
+  const result = await backend.addProduct(product);
+  // Notify main window that a product was added
+  if (mainWindow) mainWindow.webContents.send('product-added');
+  return result;
 });
 
-ipcMain.handle('add-product', async (event, product) => {
-  return backend.addProduct(product);
+ipcMain.on('open-add-product-window', () => {
+  if (!addProductWindow) createAddProductWindow();
 });
 
 ipcMain.handle('generate-invoice', async (event, invoice) => {
   return backend.generateInvoice(invoice);
+});
+
+ipcMain.handle('fetch-product-by-id', async (event, id) => {
+  return backend.fetchProductById(id);
 });
