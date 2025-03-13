@@ -59,6 +59,16 @@ function createBackend(db) {
           });
         });
       },
+
+      // Fetch a customer by id
+      fetchProductById: (id) => {
+        return new Promise((resolve, reject) => {
+          db.get('SELECT * FROM products WHERE id = ?', [id], (err, row) => {
+            if (err) reject(err);
+            else resolve(row || null); // Return null if no row is found
+          });
+        });
+      },
     };
   }
   
