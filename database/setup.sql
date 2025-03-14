@@ -19,10 +19,10 @@ CREATE TABLE IF NOT EXISTS invoices (
   customer TEXT NOT NULL,
   items TEXT NOT NULL, -- JSON string: [{productId, quantity, unit, price, cost}, ...]
   total REAL NOT NULL,
-  date TEXT NOT NULL, -- e.g., "2025-03-14"
+  date TEXT NOT NULL,
   invoice_number TEXT NOT NULL,
   invoice_type TEXT NOT NULL,
-  payment_method TEXT NOT NULL, -- "Cash" or "Credit Card"
+  payment_method TEXT NOT NULL,
   discount REAL DEFAULT 0,
-  bank_name TEXT -- Optional, null if cash
+  bank_name TEXT
 );

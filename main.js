@@ -17,6 +17,26 @@ function initializeDatabase() {
     if (err) console.error('Error initializing database:', err);
     else console.log('Database initialized successfully');
   });
+
+  // Add new columns to existing invoices table
+  const alterQueries = [
+    "ALTER TABLE invoices ADD COLUMN date TEXT",
+    "ALTER TABLE invoices ADD COLUMN invoice_number TEXT",
+    "ALTER TABLE invoices ADD COLUMN invoice_type TEXT",
+    "ALTER TABLE invoices ADD COLUMN payment_method TEXT",
+    "ALTER TABLE invoices ADD COLUMN discount REAL DEFAULT 0",
+    "ALTER TABLE invoices ADD COLUMN bank_name TEXT",
+  ];
+
+  alterQueries.forEach(query => {
+    db.run(query, (err) => {
+      if (err && !err.message.includes('duplicate column name')) {
+        console.error('Error altering table:', err);
+      } else {
+        console.log('Table altered successfully or column already exists');
+      }
+    });
+  });
 }
 
 const backend = createBackend(db);
@@ -172,7 +192,6 @@ ipcMain.on('open-add-invoice-window', () => {
 ipcMain.on('open-invoices-table-window', () => {
   if (!invoicesTableWindow) createInvoicesTableWindow();
 });
-
 ipcMain.handle('add-invoice', async (event, invoice) => {
   const result = await backend.addInvoice(invoice);
   if (mainWindow) mainWindow.webContents.send('invoice-added');
