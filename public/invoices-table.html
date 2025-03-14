@@ -47,6 +47,7 @@
                       <th>Unit</th>
                       <th>Price</th>
                       <th>Overall</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -81,6 +82,15 @@
           { data: 'unit' },
           { data: 'price' },
           { data: 'overall' },
+          {
+            data: null,
+            render: (data, type, row) => {
+              return `
+                <button class="btn btn-sm btn-primary edit-btn" data-id="${row.id}">Edit</button>
+                <button class="btn btn-sm btn-danger delete-btn" data-id="${row.id}">Delete</button>
+              `;
+            },
+          },
         ],
       });
 
@@ -123,6 +133,22 @@
 
       loadInvoices();
       window.api.onInvoiceAdded(() => loadInvoices());
+
+      // Delete invoice
+      $('#invoices-datatables').on('click', '.delete-btn', function () {
+        const id = $(this).data('id');
+        if (confirm(`Are you sure you want to delete invoice ID ${id}?`)) {
+          window.api.deleteInvoice(id)
+            .then(() => loadInvoices())
+            .catch((err) => console.error('Error deleting invoice:', err));
+        }
+      });
+
+      // Edit invoice
+      $('#invoices-datatables').on('click', '.edit-btn', function () {
+        const id = $(this).data('id');
+        window.api.openEditInvoiceWindow(id);
+      });
     });
   </script>
 </body>

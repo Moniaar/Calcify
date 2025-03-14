@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Invoice</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h3>Edit Invoice</h3>
+    <form id="editInvoiceForm">
+      <input type="hidden" id="id">
+      <div class="mb-3">
+        <label for="customer" class="form-label">Customer Name</label>
+        <input type="text" class="form-control" id="customer" required>
+      </div>
+      <div id="items"></div>
+      <button type="button" id="addItemBtn" class="btn btn-secondary mb-3">Add Another Item</button>
+      <div class="mb-3">
+        <label for="date" class="form-label">Date</label>
+        <input type="date" class="form-control" id="date" required>
+      </div>
+      <div class="mb-3">
+        <label for="invoiceNumber" class="form-label">Invoice Number</label>
+        <input type="text" class="form-control" id="invoiceNumber" required>
+      </div>
+      <div class="mb-3">
+        <label for="invoiceType" class="form-label">Invoice Type</label>
+        <input type="text" class="form-control" id="invoiceType" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Payment Method</label>
+        <select class="form-select" id="paymentMethod" required>
+          <option value="Cash">Cash</option>
+          <option value="Credit Card">Credit Card</option>
+        </select>
+      </div>
+      <div class="mb-3" id="bankNameDiv" class="hidden">
+        <label for="bankName" class="form-label">Bank Name</label>
+        <input type="text" class="form-control" id="bankName">
+      </div>
+      <div class="mb-3">
+        <label for="discount" class="form-label">Discount (%)</label>
+        <input type="number" class="form-control" id="discount" min="0" max="100" value="0">
+      </div>
+      <button type="button" id="reviewBtn" class="btn btn-primary">Review Invoice</button>
+    </form>
+
+    <div id="reviewSection" class="mt-4 hidden">
+      <h4>Invoice Review</h4>
+      <p><strong>Customer:</strong> <span id="reviewCustomer"></span></p>
+      <p><strong>Date:</strong> <span id="reviewDate"></span></p>
+      <p><strong>Invoice Number:</strong> <span id="reviewInvoiceNumber"></span></p>
+      <p><strong>Invoice Type:</strong> <span id="reviewInvoiceType"></span></p>
+      <p><strong>Payment Method:</strong> <span id="reviewPaymentMethod"></span></p>
+      <p><strong>Bank Name:</strong> <span id="reviewBankName"></span></p>
+      <p><strong>Discount:</strong> <span id="reviewDiscount"></span>%</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Price</th>
+            <th>Cost</th>
+          </tr>
+        </thead>
+        <tbody id="reviewItems"></tbody>
+      </table>
+      <p><strong>Total:</strong> $<span id="reviewTotal"></span></p>
+      <button id="saveBtn" class="btn btn-success">Save Changes</button>
+      <button id="printBtn" class="btn btn-info">Print Invoice</button>
+      <button id="editBtn" class="btn btn-secondary">Edit</button>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceId = urlParams.get('id');
+
+    // Load products into select dropdowns
+    function populateProducts(select) {
+      window.api.fetchProducts()
+        .then((products) => {
+          products.forEach(product => {
+            const option = document.createElement('option');
+            option.value = product.id;
+            option.textContent = `${product.name} (Stock: ${product.stock})`;
+            option.dataset.price = product.price;
+            select.appendChild(option);
+          });
+        })
+        .catch((err) => console.error('Error loading products:', err));
+    }
+
+    // Load existing invoice data
+    window.api.fetchInvoiceById(invoiceId)
+      .then((invoice) => {
+        if (invoice) {
+          document.getElementById('id').value = invoice.id;
+          document.getElementById('customer').value = invoice.customer;
+          document.getElementById('date').value = invoice.date;
+          document.getElementById('invoiceNumber').value = invoice.invoice_number;
+          document.getElementById('invoiceType').value = invoice.invoice_type;
+          document.getElementById('paymentMethod').value = invoice.payment_method;
+          document.getElementById('bankName').value = invoice.bank_name || '';
+          document.getElementById('discount').value = invoice.discount || 0;
+          if (invoice.payment_method === 'Credit Card') {
+            document.getElementById('bankNameDiv').classList.remove('hidden');
+            document.getElementById('bankName').required = true;
+          }
+          const items = JSON.parse(invoice.items);
+          const itemsContainer = document.getElementById('items');
+          itemsContainer.innerHTML = '';
+          items.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item mb-3';
+            itemDiv.innerHTML = `
+              <select class="form-select product-select" required>
+                <option value="">Select Product</option>
+              </select>
+              <input type="number" class="form-control mt-2 quantity" placeholder="Quantity" min="1" value="${item.quantity}" required>
+              <input type="text" class="form-control mt-2 unit" placeholder="Unit (e.g., tablets)" value="${item.unit}" required>
+            `;
+            itemsContainer.appendChild(itemDiv);
+            const select = itemDiv.querySelector('.product-select');
+            populateProducts(select);
+            select.value = item.productId;
+          });
+        }
+      })
+      .catch((err) => console.error('Error loading invoice:', err));
+
+    // Add new item row
+    document.getElementById('addItemBtn').addEventListener('click', () => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'item mb-3';
+      itemDiv.innerHTML = `
+        <select class="form-select product-select" required>
+          <option value="">Select Product</option>
+        </select>
+        <input type="number" class="form-control mt-2 quantity" placeholder="Quantity" min="1" required>
+        <input type="text" class="form-control mt-2 unit" placeholder="Unit (e.g., tablets)" required>
+      `;
+      document.getElementById('items').appendChild(itemDiv);
+      populateProducts(itemDiv.querySelector('.product-select'));
+    });
+
+    // Toggle bank name field
+    document.getElementById('paymentMethod').addEventListener('change', (e) => {
+      const bankNameDiv = document.getElementById('bankNameDiv');
+      if (e.target.value === 'Credit Card') {
+        bankNameDiv.classList.remove('hidden');
+        document.getElementById('bankName').required = true;
+      } else {
+        bankNameDiv.classList.add('hidden');
+        document.getElementById('bankName').required = false;
+        document.getElementById('bankName').value = '';
+      }
+    });
+
+    // Review invoice
+    document.getElementById('reviewBtn').addEventListener('click', () => {
+      const customer = document.getElementById('customer').value;
+      const date = document.getElementById('date').value;
+      const invoiceNumber = document.getElementById('invoiceNumber').value;
+      const invoiceType = document.getElementById('invoiceType').value;
+      const paymentMethod = document.getElementById('paymentMethod').value;
+      const bankName = document.getElementById('bankName').value;
+      const discount = parseFloat(document.getElementById('discount').value) || 0;
+      const items = [];
+      let total = 0;
+
+      const promises = [];
+      document.querySelectorAll('.item').forEach(item => {
+        const productId = item.querySelector('.product-select').value;
+        const quantity = parseInt(item.querySelector('.quantity').value, 10);
+        const unit = item.querySelector('.unit').value;
+        promises.push(
+          window.api.fetchProductById(productId).then(product => {
+            const cost = product.price * quantity;
+            items.push({ productId, quantity, unit, price: product.price, cost });
+            total += cost;
+          })
+        );
+      });
+
+      Promise.all(promises).then(() => {
+        const discountedTotal = total * (1 - discount / 100);
+        document.getElementById('reviewCustomer').textContent = customer;
+        document.getElementById('reviewDate').textContent = date;
+        document.getElementById('reviewInvoiceNumber').textContent = invoiceNumber;
+        document.getElementById('reviewInvoiceType').textContent = invoiceType;
+        document.getElementById('reviewPaymentMethod').textContent = paymentMethod;
+        document.getElementById('reviewBankName').textContent = bankName || 'N/A';
+        document.getElementById('reviewDiscount').textContent = discount;
+        const reviewItems = document.getElementById('reviewItems');
+        reviewItems.innerHTML = '';
+        items.forEach(item => {
+          window.api.fetchProductById(item.productId).then(product => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${product.name}</td>
+              <td>${item.quantity}</td>
+              <td>${item.unit}</td>
+              <td>$${item.price.toFixed(2)}</td>
+              <td>$${item.cost.toFixed(2)}</td>
+            `;
+            reviewItems.appendChild(row);
+          });
+        });
+        document.getElementById('reviewTotal').textContent = discountedTotal.toFixed(2);
+
+        document.getElementById('editInvoiceForm').classList.add('hidden');
+        document.getElementById('reviewSection').classList.remove('hidden');
+      });
+    });
+
+    // Save changes
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const invoice = {
+        id: document.getElementById('id').value,
+        customer: document.getElementById('customer').value,
+        items: Array.from(document.querySelectorAll('.item')).map(item => ({
+          productId: item.querySelector('.product-select').value,
+          quantity: parseInt(item.querySelector('.quantity').value, 10),
+          unit: item.querySelector('.unit').value,
+          price: parseFloat(item.querySelector('.product-select option:checked').dataset.price || 0),
+          cost: parseFloat(item.querySelector('.product-select option:checked').dataset.price || 0) * parseInt(item.querySelector('.quantity').value, 10),
+        })),
+        total: parseFloat(document.getElementById('reviewTotal').textContent),
+        date: document.getElementById('date').value,
+        invoice_number: document.getElementById('invoiceNumber').value,
+        invoice_type: document.getElementById('invoiceType').value,
+        payment_method: document.getElementById('paymentMethod').value,
+        discount: parseFloat(document.getElementById('discount').value) || 0,
+        bank_name: document.getElementById('paymentMethod').value === 'Credit Card' ? document.getElementById('bankName').value : null,
+      };
+      window.api.editInvoice(invoice)
+        .then(() => window.close())
+        .catch((err) => console.error('Error editing invoice:', err));
+    });
+
+    // Print invoice
+    document.getElementById('printBtn').addEventListener('click', () => {
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+        <head><title>Invoice</title></head>
+        <body>
+          <h2>Invoice</h2>
+          <p><strong>Customer:</strong> ${document.getElementById('reviewCustomer').textContent}</p>
+          <p><strong>Date:</strong> ${document.getElementById('reviewDate').textContent}</p>
+          <p><strong>Invoice Number:</strong> ${document.getElementById('reviewInvoiceNumber').textContent}</p>
+          <p><strong>Invoice Type:</strong> ${document.getElementById('reviewInvoiceType').textContent}</p>
+          <p><strong>Payment Method:</strong> ${document.getElementById('reviewPaymentMethod').textContent}</p>
+          <p><strong>Bank Name:</strong> ${document.getElementById('reviewBankName').textContent}</p>
+          <p><strong>Discount:</strong> ${document.getElementById('reviewDiscount').textContent}%</p>
+          <table border="1">
+            <thead><tr><th>Product</th><th>Quantity</th><th>Unit</th><th>Price</th><th>Cost</th></tr></thead>
+            <tbody>${document.getElementById('reviewItems').innerHTML}</tbody>
+          </table>
+          <p><strong>Total:</strong> $${document.getElementById('reviewTotal').textContent}</p>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    });
+
+    // Go back to edit
+    document.getElementById('editBtn').addEventListener('click', () => {
+      document.getElementById('editInvoiceForm').classList.remove('hidden');
+      document.getElementById('reviewSection').classList.add('hidden');
+    });
+  </script>
+</body>
+</html>

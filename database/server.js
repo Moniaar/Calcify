@@ -60,6 +60,34 @@ function createBackend(db) {
         );
       });
     },
+    deleteInvoice: (id) => {
+      return new Promise((resolve, reject) => {
+        db.run('DELETE FROM invoices WHERE id = ?', [id], function (err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        });
+      });
+    },
+    editInvoice: ({ id, customer, items, total, date, invoice_number, invoice_type, payment_method, discount, bank_name }) => {
+      return new Promise((resolve, reject) => {
+        db.run(
+          'UPDATE invoices SET customer = ?, items = ?, total = ?, date = ?, invoice_number = ?, invoice_type = ?, payment_method = ?, discount = ?, bank_name = ? WHERE id = ?',
+          [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount, bank_name || null, id],
+          function (err) {
+            if (err) reject(err);
+            else resolve({ changes: this.changes });
+          }
+        );
+      });
+    },
+    fetchInvoiceById: (id) => {
+      return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM invoices WHERE id = ?', [id], (err, row) => {
+          if (err) reject(err);
+          else resolve(row || null);
+        });
+      });
+    },
   };
 }
 

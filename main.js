@@ -149,7 +149,8 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// IPC Handlers
+// ... (previous code remains unchanged until IPC handlers)
+
 ipcMain.handle('fetch-products', async () => backend.fetchProducts());
 ipcMain.handle('add-product', async (event, product) => {
   const result = await backend.addProduct(product);
@@ -177,6 +178,38 @@ ipcMain.handle('add-invoice', async (event, invoice) => {
   if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added');
   return result;
 });
+ipcMain.handle('delete-invoice', async (event, id) => {
+  const result = await backend.deleteInvoice(id);
+  if (mainWindow) mainWindow.webContents.send('invoice-added'); // Refresh counter
+  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added'); // Refresh table
+  return result;
+});
+ipcMain.handle('edit-invoice', async (event, invoice) => {
+  const result = await backend.editInvoice(invoice);
+  if (mainWindow) mainWindow.webContents.send('invoice-added');
+  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added');
+  return result;
+});
+ipcMain.handle('fetch-invoice-by-id', async (event, id) => backend.fetchInvoiceById(id));
+
+// Window creation functions
+let editInvoiceWindow;
+function createEditInvoiceWindow(invoiceId) {
+  editInvoiceWindow = new BrowserWindow({
+    width: 600,
+    height: 400,
+    parent: mainWindow,
+    modal: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  editInvoiceWindow.loadFile('public/edit-invoice.html', { query: { id: invoiceId } });
+  editInvoiceWindow.on('closed', () => editInvoiceWindow = null);
+}
+
 ipcMain.on('open-add-product-window', () => {
   if (!addProductWindow) createAddProductWindow();
 });
@@ -192,9 +225,6 @@ ipcMain.on('open-add-invoice-window', () => {
 ipcMain.on('open-invoices-table-window', () => {
   if (!invoicesTableWindow) createInvoicesTableWindow();
 });
-ipcMain.handle('add-invoice', async (event, invoice) => {
-  const result = await backend.addInvoice(invoice);
-  if (mainWindow) mainWindow.webContents.send('invoice-added');
-  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added');
-  return result;
+ipcMain.on('open-edit-invoice-window', (event, id) => {
+  if (!editInvoiceWindow) createEditInvoiceWindow(id);
 });
