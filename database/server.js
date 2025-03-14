@@ -48,15 +48,18 @@ function createBackend(db) {
         });
       });
     },
-    addInvoice: ({ customer, items, total }) => {
+    addInvoice: ({ customer, items, total, date, invoice_number, invoice_type, payment_method, discount, bank_name }) => {
       return new Promise((resolve, reject) => {
-        db.run('INSERT INTO invoices (customer, items, total) VALUES (?, ?, ?)', [customer, JSON.stringify(items), total], function (err) {
-          if (err) reject(err);
-          else resolve({ id: this.lastID });
-        });
+        db.run(
+          'INSERT INTO invoices (customer, items, total, date, invoice_number, invoice_type, payment_method, discount, bank_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount, bank_name || null],
+          function (err) {
+            if (err) reject(err);
+            else resolve({ id: this.lastID });
+          }
+        );
       });
     },
-    // ... other methods (fetchCustomers, etc.)
   };
 }
 

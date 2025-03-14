@@ -172,3 +172,10 @@ ipcMain.on('open-add-invoice-window', () => {
 ipcMain.on('open-invoices-table-window', () => {
   if (!invoicesTableWindow) createInvoicesTableWindow();
 });
+
+ipcMain.handle('add-invoice', async (event, invoice) => {
+  const result = await backend.addInvoice(invoice);
+  if (mainWindow) mainWindow.webContents.send('invoice-added');
+  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added');
+  return result;
+});

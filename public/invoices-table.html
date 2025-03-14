@@ -34,6 +34,12 @@
                     <tr>
                       <th>ID</th>
                       <th>Customer</th>
+                      <th>Date</th>
+                      <th>Invoice Number</th>
+                      <th>Invoice Type</th>
+                      <th>Payment Method</th>
+                      <th>Bank Name</th>
+                      <th>Discount</th>
                       <th>Product Name</th>
                       <th>Cost</th>
                       <th>Stock</th>
@@ -62,6 +68,12 @@
         columns: [
           { data: 'id' },
           { data: 'customer' },
+          { data: 'date' },
+          { data: 'invoice_number' },
+          { data: 'invoice_type' },
+          { data: 'payment_method' },
+          { data: 'bank_name' },
+          { data: 'discount' },
           { data: 'productName' },
           { data: 'cost' },
           { data: 'stock' },
@@ -82,7 +94,13 @@
                 rows.push({
                   id: invoice.id,
                   customer: invoice.customer,
-                  productName: '', // Filled below
+                  date: invoice.date,
+                  invoice_number: invoice.invoice_number,
+                  invoice_type: invoice.invoice_type,
+                  payment_method: invoice.payment_method,
+                  bank_name: invoice.bank_name || 'N/A',
+                  discount: invoice.discount,
+                  productName: '',
                   cost: item.cost,
                   stock: item.stock,
                   quantity: item.quantity,
