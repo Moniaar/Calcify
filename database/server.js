@@ -40,6 +40,22 @@ function createBackend(db) {
         });
       });
     },
+    fetchInvoices: () => {
+      return new Promise((resolve, reject) => {
+        db.all('SELECT * FROM invoices', [], (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        });
+      });
+    },
+    addInvoice: ({ customer, items, total }) => {
+      return new Promise((resolve, reject) => {
+        db.run('INSERT INTO invoices (customer, items, total) VALUES (?, ?, ?)', [customer, JSON.stringify(items), total], function (err) {
+          if (err) reject(err);
+          else resolve({ id: this.lastID });
+        });
+      });
+    },
     // ... other methods (fetchCustomers, etc.)
   };
 }

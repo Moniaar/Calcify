@@ -17,6 +17,6 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS invoices (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   customer TEXT NOT NULL,
-  items TEXT NOT NULL, -- JSON string
+  items TEXT NOT NULL, -- JSON string: [{productId, quantity, unit, price, cost, overall}, ...]
   total REAL NOT NULL
 );

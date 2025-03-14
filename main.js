@@ -21,7 +21,6 @@ function initializeDatabase() {
 
 const backend = createBackend(db);
 
-// Main window
 let mainWindow;
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -36,7 +35,6 @@ function createMainWindow() {
   mainWindow.loadFile('public/index.html');
 }
 
-// Add product window
 let addProductWindow;
 function createAddProductWindow() {
   addProductWindow = new BrowserWindow({
@@ -54,7 +52,6 @@ function createAddProductWindow() {
   addProductWindow.on('closed', () => addProductWindow = null);
 }
 
-// Edit product window
 let editProductWindow;
 function createEditProductWindow(productId) {
   editProductWindow = new BrowserWindow({
@@ -72,7 +69,6 @@ function createEditProductWindow(productId) {
   editProductWindow.on('closed', () => editProductWindow = null);
 }
 
-// Products table window
 let productsTableWindow;
 function createProductsTableWindow() {
   productsTableWindow = new BrowserWindow({
@@ -86,6 +82,38 @@ function createProductsTableWindow() {
   });
   productsTableWindow.loadFile('public/products-table.html');
   productsTableWindow.on('closed', () => productsTableWindow = null);
+}
+
+let addInvoiceWindow;
+function createAddInvoiceWindow() {
+  addInvoiceWindow = new BrowserWindow({
+    width: 600,
+    height: 400,
+    parent: mainWindow,
+    modal: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  addInvoiceWindow.loadFile('public/add-invoice.html');
+  addInvoiceWindow.on('closed', () => addInvoiceWindow = null);
+}
+
+let invoicesTableWindow;
+function createInvoicesTableWindow() {
+  invoicesTableWindow = new BrowserWindow({
+    width: 1200,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  invoicesTableWindow.loadFile('public/invoices-table.html');
+  invoicesTableWindow.on('closed', () => invoicesTableWindow = null);
 }
 
 app.whenReady().then(() => {
@@ -109,30 +137,38 @@ ipcMain.handle('add-product', async (event, product) => {
   if (productsTableWindow) productsTableWindow.webContents.send('product-added');
   return result;
 });
-
 ipcMain.handle('delete-product', async (event, id) => {
   const result = await backend.deleteProduct(id);
-  if (mainWindow) mainWindow.webContents.send('product-added'); // Refresh counter
-  if (productsTableWindow) productsTableWindow.webContents.send('product-added'); // Refresh table
+  if (mainWindow) mainWindow.webContents.send('product-added');
+  if (productsTableWindow) productsTableWindow.webContents.send('product-added');
   return result;
 });
-
 ipcMain.handle('edit-product', async (event, product) => {
   const result = await backend.editProduct(product);
   if (mainWindow) mainWindow.webContents.send('product-added');
   if (productsTableWindow) productsTableWindow.webContents.send('product-added');
   return result;
 });
-
 ipcMain.handle('fetch-product-by-id', async (event, id) => backend.fetchProductById(id));
+ipcMain.handle('fetch-invoices', async () => backend.fetchInvoices());
+ipcMain.handle('add-invoice', async (event, invoice) => {
+  const result = await backend.addInvoice(invoice);
+  if (mainWindow) mainWindow.webContents.send('invoice-added');
+  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added');
+  return result;
+});
 ipcMain.on('open-add-product-window', () => {
   if (!addProductWindow) createAddProductWindow();
 });
-
 ipcMain.on('open-products-table-window', () => {
   if (!productsTableWindow) createProductsTableWindow();
 });
-
 ipcMain.on('open-edit-product-window', (event, id) => {
   if (!editProductWindow) createEditProductWindow(id);
+});
+ipcMain.on('open-add-invoice-window', () => {
+  if (!addInvoiceWindow) createAddInvoiceWindow();
+});
+ipcMain.on('open-invoices-table-window', () => {
+  if (!invoicesTableWindow) createInvoicesTableWindow();
 });
