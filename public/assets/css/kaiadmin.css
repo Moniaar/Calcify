@@ -92,7 +92,7 @@ body, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6, p, .navbar, .brand, 
 
 body, html {
   font-size: 14px;
-  color: #2A2F5B; }
+  color: #ffffff; }
 
 a {
   color: #1572E8;
@@ -151,7 +151,7 @@ b, .b, strong, .strong {
 .page-title {
   font-size: 23px;
   font-weight: 600;
-  color: #444444;
+  color: #978c8c;
   line-height: 30px;
   margin-bottom: 20px; }
 
@@ -251,7 +251,7 @@ label {
 body {
   min-height: 100vh;
   position: relative;
-  background: #F5F7FD;
+  background: #959BB5;
   background-size: cover;
   background-attachment: fixed;
   background-repeat: no-repeat; }
