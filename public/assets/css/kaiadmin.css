@@ -542,7 +542,9 @@ body {
   padding: 15px;
   background: #ffffff;
   position: absolute;
-  width: 100%; }
+  width: 100%;
+  right: 15px;
+}
   .footer .container, .footer .container-fluid {
     display: flex;
     align-items: center; }
