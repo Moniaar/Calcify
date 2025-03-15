@@ -191,6 +191,7 @@ ipcMain.handle('edit-invoice', async (event, invoice) => {
   return result;
 });
 ipcMain.handle('fetch-invoice-by-id', async (event, id) => backend.fetchInvoiceById(id));
+ipcMain.handle('fetch-sales-total', async () => backend.fetchSalesTotal());
 
 // Window creation functions
 let editInvoiceWindow;

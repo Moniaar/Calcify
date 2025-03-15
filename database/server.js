@@ -88,6 +88,14 @@ function createBackend(db) {
         });
       });
     },
+    fetchSalesTotal: () => {
+      return new Promise((resolve, reject) => {
+        db.get('SELECT SUM(total) as total FROM invoices', (err, row) => {
+          if (err) reject(err);
+          else resolve(row.total || 0); // Return 0 if no invoices
+        });
+      });
+    },
   };
 }
 
