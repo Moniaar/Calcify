@@ -92,7 +92,15 @@ function createBackend(db) {
       return new Promise((resolve, reject) => {
         db.get('SELECT SUM(total) as total FROM invoices', (err, row) => {
           if (err) reject(err);
-          else resolve(row.total || 0); // Return 0 if no invoices
+          else resolve(row.total || 0);
+        });
+      });
+    },
+    fetchUniqueCustomerCount: () => {
+      return new Promise((resolve, reject) => {
+        db.get('SELECT COUNT(DISTINCT customer) as count FROM invoices', (err, row) => {
+          if (err) reject(err);
+          else resolve(row.count || 0); // Return 0 if no customers
         });
       });
     },

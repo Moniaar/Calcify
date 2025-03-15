@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('api', {
   editInvoice: (invoice) => ipcRenderer.invoke('edit-invoice', invoice),
   fetchInvoiceById: (id) => ipcRenderer.invoke('fetch-invoice-by-id', id),
   fetchSalesTotal: () => ipcRenderer.invoke('fetch-sales-total'),
+  fetchUniqueCustomerCount: () => ipcRenderer.invoke('fetch-unique-customer-count'),
   openAddProductWindow: () => ipcRenderer.send('open-add-product-window'),
   openProductsTableWindow: () => ipcRenderer.send('open-products-table-window'),
   openEditProductWindow: (id) => ipcRenderer.send('open-edit-product-window', id),
