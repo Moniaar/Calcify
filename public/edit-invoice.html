@@ -72,7 +72,7 @@
       <p><strong>Total:</strong> $<span id="reviewTotal"></span></p>
       <button id="saveBtn" class="btn btn-success">Save Changes</button>
       <button id="printBtn" class="btn btn-info">Print Invoice</button>
-      <button id="editBtn" class="btn btn-secondary">Edit</button>
+      <button id="editBtn" class="btn btn-secondary">Back to Edit</button>
     </div>
   </div>
 
@@ -81,7 +81,7 @@
     const invoiceId = urlParams.get('id');
 
     // Load products into select dropdowns
-    function populateProducts(select) {
+    function populateProducts(select, selectedId = '') {
       window.api.fetchProducts()
         .then((products) => {
           products.forEach(product => {
@@ -91,6 +91,7 @@
             option.dataset.price = product.price;
             select.appendChild(option);
           });
+          if (selectedId) select.value = selectedId;
         })
         .catch((err) => console.error('Error loading products:', err));
     }
@@ -126,8 +127,7 @@
             `;
             itemsContainer.appendChild(itemDiv);
             const select = itemDiv.querySelector('.product-select');
-            populateProducts(select);
-            select.value = item.productId;
+            populateProducts(select, item.productId);
           });
         }
       })
@@ -161,7 +161,7 @@
       }
     });
 
-    // Review invoice
+    // Review invoice (preview only)
     document.getElementById('reviewBtn').addEventListener('click', () => {
       const customer = document.getElementById('customer').value;
       const date = document.getElementById('date').value;
@@ -239,8 +239,10 @@
         bank_name: document.getElementById('paymentMethod').value === 'Credit Card' ? document.getElementById('bankName').value : null,
       };
       window.api.editInvoice(invoice)
-        .then(() => window.close())
-        .catch((err) => console.error('Error editing invoice:', err));
+        .then(() => {
+          window.close(); // Close the edit window after saving
+        })
+        .catch((err) => console.error('Error saving invoice changes:', err));
     });
 
     // Print invoice
