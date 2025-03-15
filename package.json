@@ -4,7 +4,7 @@
   "description": "A pharmacy POS",
   "main": "main.js",
   "scripts": {
-    "start": "electron --no-sandbox .",
+    "start": "ELECTRON_ENABLE_LOGGING=0 electron --no-sandbox .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
