@@ -1451,7 +1451,7 @@ body[data-background-color="dark"] .border-top {
 /*     Card     */
 .card, .card-light {
   border-radius: 10px;
-  background-color: #ffffff;
+  background-color: #8A8CAC;
   margin-bottom: 30px;
   -webkit-box-shadow: 2px 6px 15px 0px rgba(69, 65, 78, 0.1);
   -moz-box-shadow: 2px 6px 15px 0px rgba(69, 65, 78, 0.1);
