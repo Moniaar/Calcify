@@ -24,5 +24,6 @@ CREATE TABLE IF NOT EXISTS invoices (
   invoice_type TEXT NOT NULL,
   payment_method TEXT NOT NULL,
   discount REAL DEFAULT 0,
-  bank_name TEXT
+  bank_name TEXT,
+  sales_representative TEXT NOT NULL
 );

@@ -16,6 +16,10 @@
         <label for="customer" class="form-label">Customer Name</label>
         <input type="text" class="form-control" id="customer" required>
       </div>
+      <div class="mb-3">
+        <label for="salesRepresentative" class="form-label">Sales Representative</label>
+        <input type="text" class="form-control" id="salesRepresentative" required>
+      </div>
       <div id="items"></div>
       <button type="button" id="addItemBtn" class="btn btn-secondary mb-3">Add Another Item</button>
       <div class="mb-3">
@@ -51,6 +55,7 @@
     <div id="reviewSection" class="mt-4 hidden">
       <h4>Invoice Review</h4>
       <p><strong>Customer:</strong> <span id="reviewCustomer"></span></p>
+      <p><strong>Sales Representative:</strong> <span id="reviewSalesRepresentative"></span></p>
       <p><strong>Date:</strong> <span id="reviewDate"></span></p>
       <p><strong>Invoice Number:</strong> <span id="reviewInvoiceNumber"></span></p>
       <p><strong>Invoice Type:</strong> <span id="reviewInvoiceType"></span></p>
@@ -95,6 +100,14 @@
         })
         .catch((err) => console.error('Error loading products:', err));
     }
+
+    window.api.fetchInvoiceById(invoiceId)
+    .then((invoice) => {
+      if (invoice) {
+        // ... (other fields unchanged)
+        document.getElementById('salesRepresentative').value = invoice.sales_representative || '';
+      }
+    });
 
     // Load existing invoice data
     window.api.fetchInvoiceById(invoiceId)
@@ -164,6 +177,7 @@
     // Review invoice (preview only)
     document.getElementById('reviewBtn').addEventListener('click', () => {
       const customer = document.getElementById('customer').value;
+      const salesRepresentative = document.getElementById('salesRepresentative').value;
       const date = document.getElementById('date').value;
       const invoiceNumber = document.getElementById('invoiceNumber').value;
       const invoiceType = document.getElementById('invoiceType').value;
@@ -190,6 +204,7 @@
       Promise.all(promises).then(() => {
         const discountedTotal = total * (1 - discount / 100);
         document.getElementById('reviewCustomer').textContent = customer;
+        document.getElementById('reviewSalesRepresentative').textContent = salesRepresentative;
         document.getElementById('reviewDate').textContent = date;
         document.getElementById('reviewInvoiceNumber').textContent = invoiceNumber;
         document.getElementById('reviewInvoiceType').textContent = invoiceType;
@@ -223,6 +238,7 @@
       const invoice = {
         id: document.getElementById('id').value,
         customer: document.getElementById('customer').value,
+        sales_representative: document.getElementById('salesRepresentative').value,
         items: Array.from(document.querySelectorAll('.item')).map(item => ({
           productId: item.querySelector('.product-select').value,
           quantity: parseInt(item.querySelector('.quantity').value, 10),

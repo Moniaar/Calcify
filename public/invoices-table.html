@@ -34,6 +34,7 @@
                     <tr>
                       <th>ID</th>
                       <th>Customer</th>
+                      <th>Sales Representative</th> <!-- New column -->
                       <th>Date</th>
                       <th>Invoice Number</th>
                       <th>Invoice Type</th>
@@ -69,6 +70,7 @@
         columns: [
           { data: 'id' },
           { data: 'customer' },
+          { data: 'sales_representative' }, // New column
           { data: 'date' },
           { data: 'invoice_number' },
           { data: 'invoice_type' },
@@ -104,6 +106,7 @@
                 rows.push({
                   id: invoice.id,
                   customer: invoice.customer,
+                  sales_representative: invoice.sales_representative || 'N/A', // New field
                   date: invoice.date,
                   invoice_number: invoice.invoice_number,
                   invoice_type: invoice.invoice_type,

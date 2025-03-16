@@ -26,6 +26,7 @@ function initializeDatabase() {
     "ALTER TABLE invoices ADD COLUMN payment_method TEXT",
     "ALTER TABLE invoices ADD COLUMN discount REAL DEFAULT 0",
     "ALTER TABLE invoices ADD COLUMN bank_name TEXT",
+    "ALTER TABLE invoices ADD COLUMN sales_representative TEXT"
   ];
 
   alterQueries.forEach(query => {
@@ -149,7 +150,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// ... (previous code remains unchanged until IPC handlers)
+// IPC handlers
 
 ipcMain.handle('fetch-products', async () => backend.fetchProducts());
 ipcMain.handle('add-product', async (event, product) => {
@@ -172,6 +173,7 @@ ipcMain.handle('edit-product', async (event, product) => {
 });
 ipcMain.handle('fetch-product-by-id', async (event, id) => backend.fetchProductById(id));
 ipcMain.handle('fetch-invoices', async () => backend.fetchInvoices());
+
 ipcMain.handle('add-invoice', async (event, invoice) => {
   const result = await backend.addInvoice(invoice);
   if (mainWindow) mainWindow.webContents.send('invoice-added');

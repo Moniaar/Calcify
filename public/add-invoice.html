@@ -15,6 +15,10 @@
         <label for="customer" class="form-label">Customer Name</label>
         <input type="text" class="form-control" id="customer" required>
       </div>
+      <div class="mb-3">
+        <label for="salesRepresentative" class="form-label">Sales Representative</label>
+        <input type="text" class="form-control" id="salesRepresentative" required>
+      </div>
       <div id="items">
         <div class="item mb-3">
           <select class="form-select product-select" required>
@@ -62,6 +66,7 @@
     <div id="reviewSection" class="mt-4 hidden">
       <h4>Invoice Review</h4>
       <p><strong>Customer:</strong> <span id="reviewCustomer"></span></p>
+      <p><strong>Sales Representative:</strong> <span id="reviewSalesRepresentative"></span></p>
       <p><strong>Date:</strong> <span id="reviewDate"></span></p>
       <p><strong>Invoice Number:</strong> <span id="reviewInvoiceNumber"></span></p>
       <p><strong>Invoice Type:</strong> <span id="reviewInvoiceType"></span></p>
@@ -149,6 +154,7 @@
       const discount = parseFloat(document.getElementById('discount').value) || 0;
       const items = [];
       let total = 0;
+    });
 
       const promises = [];
       document.querySelectorAll('.item').forEach(item => {
@@ -164,36 +170,69 @@
         );
       });
 
-      Promise.all(promises).then(() => {
-        const discountedTotal = total * (1 - discount / 100);
-        document.getElementById('reviewCustomer').textContent = customer;
-        document.getElementById('reviewDate').textContent = date;
-        document.getElementById('reviewInvoiceNumber').textContent = invoiceNumber;
-        document.getElementById('reviewInvoiceType').textContent = invoiceType;
-        document.getElementById('reviewPaymentMethod').textContent = paymentMethod;
-        document.getElementById('reviewBankName').textContent = bankName || 'N/A';
-        document.getElementById('reviewDiscount').textContent = discount;
-        const reviewItems = document.getElementById('reviewItems');
-        reviewItems.innerHTML = '';
-        items.forEach(item => {
-          window.api.fetchProductById(item.productId).then(product => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${product.name}</td>
-              <td>${item.quantity}</td>
-              <td>${item.unit}</td>
-              <td>$${item.price.toFixed(2)}</td>
-              <td>$${item.cost.toFixed(2)}</td>
-            `;
-            reviewItems.appendChild(row);
-          });
-        });
-        document.getElementById('reviewTotal').textContent = discountedTotal.toFixed(2);
+document.getElementById('reviewBtn').addEventListener('click', () => {
+    console.log('Review button clicked');
+    const customer = document.getElementById('customer').value;
+    const salesRepresentative = document.getElementById('salesRepresentative').value;
+    const date = document.getElementById('date').value;
+    const invoiceNumber = document.getElementById('invoiceNumber').value;
+    const invoiceType = document.getElementById('invoiceType').value;
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    const bankName = document.getElementById('bankName').value;
+    const discount = parseFloat(document.getElementById('discount').value) || 0;
+    const items = [];
+    let total = 0;
 
-        document.getElementById('addInvoiceForm').classList.add('hidden');
-        document.getElementById('reviewSection').classList.remove('hidden');
-      });
+    const promises = [];
+    document.querySelectorAll('.item').forEach(item => {
+      const productId = item.querySelector('.product-select').value;
+      const quantity = parseInt(item.querySelector('.quantity').value, 10);
+      const unit = item.querySelector('.unit').value;
+      console.log('Item:', { productId, quantity, unit });
+      promises.push(
+        window.api.fetchProductById(productId).then(product => {
+          console.log('Fetched product:', product);
+          const cost = product.price * quantity;
+          items.push({ productId, quantity, unit, price: product.price, cost });
+          total += cost;
+        }).catch(err => console.error('Error fetching product:', err))
+      );
     });
+
+    console.log('Promises created:', promises.length);
+    Promise.all(promises).then(() => {
+      console.log('Promises resolved, items:', items);
+      const discountedTotal = total * (1 - discount / 100);
+      document.getElementById('reviewCustomer').textContent = customer;
+      document.getElementById('reviewSalesRepresentative').textContent = salesRepresentative;
+      document.getElementById('reviewDate').textContent = date;
+      document.getElementById('reviewInvoiceNumber').textContent = invoiceNumber;
+      document.getElementById('reviewInvoiceType').textContent = invoiceType;
+      document.getElementById('reviewPaymentMethod').textContent = paymentMethod;
+      document.getElementById('reviewBankName').textContent = bankName || 'N/A';
+      document.getElementById('reviewDiscount').textContent = discount;
+      const reviewItems = document.getElementById('reviewItems');
+      reviewItems.innerHTML = '';
+      items.forEach(item => {
+        window.api.fetchProductById(item.productId).then(product => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${product.name}</td>
+            <td>${item.quantity}</td>
+            <td>${item.unit}</td>
+            <td>$${item.price.toFixed(2)}</td>
+            <td>$${item.cost.toFixed(2)}</td>
+          `;
+          reviewItems.appendChild(row);
+        });
+      });
+      document.getElementById('reviewTotal').textContent = discountedTotal.toFixed(2);
+
+      console.log('Showing review section');
+      document.getElementById('addInvoiceForm').classList.add('hidden');
+      document.getElementById('reviewSection').classList.remove('hidden');
+    }).catch(err => console.error('Promise.all failed:', err));
+  });
 
     // Save invoice
     document.getElementById('saveBtn').addEventListener('click', () => {
@@ -218,6 +257,17 @@
         .then(() => window.close())
         .catch((err) => console.error('Error saving invoice:', err));
     });
+
+    document.getElementById('saveBtn').addEventListener('click', () => {
+    const invoice = {
+      customer: document.getElementById('customer').value,
+      sales_representative: document.getElementById('salesRepresentative').value,
+      // ... (other fields unchanged)
+    };
+    window.api.addInvoice(invoice)
+      .then(() => window.close())
+      .catch((err) => console.error('Error adding invoice:', err));
+  });
 
     // Print invoice
     document.getElementById('printBtn').addEventListener('click', () => {
