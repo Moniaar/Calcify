@@ -10,27 +10,33 @@
     <form id="editProductForm">
       <input type="hidden" id="id">
       <div class="mb-3">
-        <label for="name" class="form-label">Name</label>
+        <label for="name" class="form-label">Product Name</label>
         <input type="text" class="form-control" id="name" required>
       </div>
       <div class="mb-3">
-        <label for="price" class="form-label">Price</label>
-        <input type="number" step="0.01" class="form-control" id="price" required>
+        <label for="price" class="form-label">Price ($)</label>
+        <input type="number" class="form-control" id="price" step="0.01" min="0" required>
       </div>
       <div class="mb-3">
         <label for="stock" class="form-label">Stock</label>
-        <input type="number" class="form-control" id="stock" required>
+        <input type="number" class="form-control" id="stock" min="0" required>
+      </div>
+      <div class="mb-3">
+        <label for="storageLocation" class="form-label">Storage Location</label>
+        <select class="form-select" id="storageLocation" required>
+          <option value="">Select Storage Location</option>
+          <option value="Medical Supplements">Medical Supplements</option>
+          <option value="Laboratory Supplements">Laboratory Supplements</option>
+        </select>
       </div>
       <button type="submit" class="btn btn-primary">Save Changes</button>
     </form>
   </div>
 
   <script>
-    // Get product ID from URL query
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
-    // Load existing product data
     window.api.fetchProductById(productId)
       .then((product) => {
         if (product) {
@@ -38,11 +44,11 @@
           document.getElementById('name').value = product.name;
           document.getElementById('price').value = product.price;
           document.getElementById('stock').value = product.stock;
+          document.getElementById('storageLocation').value = product.storage_location || '';
         }
       })
       .catch((err) => console.error('Error loading product:', err));
 
-    // Handle form submission
     document.getElementById('editProductForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const product = {
@@ -50,11 +56,10 @@
         name: document.getElementById('name').value,
         price: parseFloat(document.getElementById('price').value),
         stock: parseInt(document.getElementById('stock').value, 10),
+        storage_location: document.getElementById('storageLocation').value
       };
       window.api.editProduct(product)
-        .then(() => {
-          window.close(); // Close the edit window
-        })
+        .then(() => window.close())
         .catch((err) => console.error('Error editing product:', err));
     });
   </script>
