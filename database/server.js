@@ -10,12 +10,16 @@ function createBackend(db) {
         });
       });
     },
-    addProduct: ({ name, price, stock }) => {
+    addProduct: ({ name, price, stock, storage_location }) => {
       return new Promise((resolve, reject) => {
-        db.run('INSERT INTO products (name, price, stock) VALUES (?, ?, ?)', [name, price, stock], function (err) {
-          if (err) reject(err);
-          else resolve({ id: this.lastID });
-        });
+        db.run(
+          'INSERT INTO products (name, price, stock, storage_location) VALUES (?, ?, ?, ?)',
+          [name, price, stock, storage_location],
+          function (err) {
+            if (err) reject(err);
+            else resolve({ id: this.lastID });
+          }
+        );
       });
     },
     deleteProduct: (id) => {
@@ -26,11 +30,23 @@ function createBackend(db) {
         });
       });
     },
-    editProduct: ({ id, name, price, stock }) => {
+    editProduct: ({ id, name, price, stock, storage_location }) => {
       return new Promise((resolve, reject) => {
-        db.run('UPDATE products SET name = ?, price = ?, stock = ? WHERE id = ?', [name, price, stock, id], function (err) {
+        db.run(
+          'UPDATE products SET name = ?, price = ?, stock = ?, storage_location = ? WHERE id = ?',
+          [name, price, stock, storage_location, id],
+          function (err) {
+            if (err) reject(err);
+            else resolve({ changes: this.changes });
+          }
+        );
+      });
+    },
+    fetchProductById: (id) => {
+      return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM products WHERE id = ?', [id], (err, row) => {
           if (err) reject(err);
-          else resolve({ changes: this.changes });
+          else resolve(row || null);
         });
       });
     },

@@ -26,7 +26,8 @@ function initializeDatabase() {
     "ALTER TABLE invoices ADD COLUMN payment_method TEXT",
     "ALTER TABLE invoices ADD COLUMN discount REAL DEFAULT 0",
     "ALTER TABLE invoices ADD COLUMN bank_name TEXT",
-    "ALTER TABLE invoices ADD COLUMN sales_representative TEXT"
+    "ALTER TABLE invoices ADD COLUMN sales_representative TEXT",
+    "ALTER TABLE products ADD COLUMN storage_location TEXT" // New column for storage table
   ];
 
   alterQueries.forEach(query => {
