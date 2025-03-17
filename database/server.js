@@ -70,8 +70,8 @@ function createBackend(db) {
       return new Promise((resolve, reject) => {
         db.serialize(() => {
           db.run(
-            'INSERT INTO invoices (customer, items, total, date, invoice_number, invoice_type, payment_method, discount, bank_name, sales_representative) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount, bank_name || null, sales_representative],
+            'INSERT INTO invoices (customer, items, total, date, invoice_number, invoice_type, payment_method, discount, bank_name, sales_representative, paid_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount, bank_name || null, sales_representative, paid_amount],
             function (err) {
               if (err) return reject(err);
               const invoiceId = this.lastID;
