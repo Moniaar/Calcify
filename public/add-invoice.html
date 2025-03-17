@@ -4,7 +4,20 @@
   <title>Add Invoice</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
-    .hidden { display: none; }
+    @media print {
+      body * { visibility: hidden; }
+      #printInvoiceSection, #printInvoiceSection * { visibility: visible; }
+      #printInvoiceSection {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 210mm; /* A4 portrait */
+        height: 297mm;
+        padding: 20mm;
+        font-family: 'Arial', sans-serif;
+      }
+      .no-print { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -19,18 +32,6 @@
         <label for="salesRepresentative" class="form-label">Sales Representative</label>
         <input type="text" class="form-control" id="salesRepresentative" required>
       </div>
-      <div id="items">
-        <div class="item mb-3">
-          <select class="form-select product-select" required>
-            <option value="">Select Product</option>
-          </select>
-          <input type="number" class="form-control mt-2 quantity" placeholder="Quantity" min="1" required>
-          <input type="text" class="form-control mt-2 unit" placeholder="Unit (e.g., tablets)" required>
-        </div>
-      </div>
-      <button type="button" id="addItemBtn" class="btn btn-secondary mb-3">Add Another Item</button>
-
-      <!-- New Sections -->
       <div class="mb-3">
         <label for="date" class="form-label">Date</label>
         <input type="date" class="form-control" id="date" required>
@@ -41,16 +42,16 @@
       </div>
       <div class="mb-3">
         <label for="invoiceType" class="form-label">Invoice Type</label>
-        <input type="text" class="form-control" id="invoiceType" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Payment Method</label>
-        <select class="form-select" id="paymentMethod" required>
+        <select class="form-select" id="invoiceType" required>
           <option value="Cash">Cash</option>
-          <option value="Credit Card">Credit Card</option>
+          <option value="Credit">Credit</option>
         </select>
       </div>
-      <div class="mb-3" id="bankNameDiv" class="hidden">
+      <div class="mb-3">
+        <label for="paymentMethod" class="form-label">Payment Method</label>
+        <input type="text" class="form-control" id="paymentMethod" required>
+      </div>
+      <div class="mb-3">
         <label for="bankName" class="form-label">Bank Name</label>
         <input type="text" class="form-control" id="bankName">
       </div>
@@ -58,11 +59,30 @@
         <label for="discount" class="form-label">Discount (%)</label>
         <input type="number" class="form-control" id="discount" min="0" max="100" value="0">
       </div>
-
-      <button type="button" id="reviewBtn" class="btn btn-primary">Review Invoice</button>
+      <div class="mb-3">
+        <label for="paidAmount" class="form-label">Amount Paid (SDG)</label>
+        <input type="number" class="form-control" id="paidAmount" min="0" value="0" required>
+      </div>
+      <div id="items">
+        <div class="item row mb-3">
+          <div class="col">
+            <label class="form-label">Product</label>
+            <select class="form-select product-select" required></select>
+          </div>
+          <div class="col">
+            <label class="form-label">Quantity</label>
+            <input type="number" class="form-control quantity" min="1" required>
+          </div>
+          <div class="col">
+            <label class="form-label">Unit</label>
+            <input type="text" class="form-control unit" required>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary mb-3" id="addItemBtn">Add Item</button>
+      <button type="button" class="btn btn-primary" id="reviewBtn">Review Invoice</button>
     </form>
 
-    <!-- Review Section -->
     <div id="reviewSection" class="mt-4 hidden">
       <h4>Invoice Review</h4>
       <p><strong>Customer:</strong> <span id="reviewCustomer"></span></p>
@@ -73,6 +93,7 @@
       <p><strong>Payment Method:</strong> <span id="reviewPaymentMethod"></span></p>
       <p><strong>Bank Name:</strong> <span id="reviewBankName"></span></p>
       <p><strong>Discount:</strong> <span id="reviewDiscount"></span>%</p>
+      <p><strong>Amount Paid:</strong> <span id="reviewPaidAmount"></span> SDG</p>
       <table class="table">
         <thead>
           <tr>
@@ -85,76 +106,84 @@
         </thead>
         <tbody id="reviewItems"></tbody>
       </table>
-      <p><strong>Total:</strong> $<span id="reviewTotal"></span></p>
-      <button id="saveBtn" class="btn btn-success">Save Invoice</button>
-      <button id="printBtn" class="btn btn-info">Print Invoice</button>
-      <button id="editBtn" class="btn btn-secondary">Edit</button>
+      <p><strong>Total:</strong> <span id="reviewTotal"></span> SDG</p>
+      <button class="btn btn-success no-print" id="saveBtn">Save Invoice</button>
+      <button class="btn btn-info no-print" id="printInvoiceBtn">Print Invoice</button>
+    </div>
+
+    <div id="printInvoiceSection" class="hidden">
+      <div style="text-align: right;">
+        <img src="logo.png" alt="Company Logo" style="width: 100px; height: auto;">
+        <h4>[Pharmacy Name]</h4>
+        <p>[Pharmacy Address]</p>
+      </div>
+      <div style="text-align: left;">
+        <h3>فاتورة</h3>
+        <p><strong>رقم الفاتورة:</strong> <span id="printInvoiceNumber"></span></p>
+        <p><strong>تاريخ الطباعة:</strong> <span id="printDateIssued"></span></p>
+        <p><strong>تاريخ الإصدار:</strong> <span id="printIssueDate"></span></p>
+        <p><strong>تاريخ المطالبة:</strong> <span id="printClaimDate"></span></p>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr>
+            <th style="border: 1px solid #000; padding: 8px;">Product Name</th>
+            <th style="border: 1px solid #000; padding: 8px;">Description</th>
+            <th style="border: 1px solid #000; padding: 8px;">Unit Price (SDG)</th>
+            <th style="border: 1px solid #000; padding: 8px;">Quantity</th>
+            <th style="border: 1px solid #000; padding: 8px;">Overall</th>
+          </tr>
+        </thead>
+        <tbody id="printItems"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" style="text-align: right; border: 1px solid #000; padding: 8px;">Total:</td>
+            <td style="border: 1px solid #000; padding: 8px;" id="printTotal"></td>
+          </tr>
+          <tr>
+            <td colspan="4" style="text-align: right; border: 1px solid #000; padding: 8px;">Paid:</td>
+            <td style="border: 1px solid #000; padding: 8px;" id="printPaid"></td>
+          </tr>
+          <tr>
+            <td colspan="4" style="text-align: right; border: 1px solid #000; padding: 8px;">Claimed:</td>
+            <td style="border: 1px solid #000; padding: 8px;" id="printClaimed"></td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   </div>
 
   <script>
-    // Load products into select dropdowns
-    window.api.fetchProducts()
-      .then((products) => {
-        document.querySelectorAll('.product-select').forEach(select => {
-          products.forEach(product => {
-            const option = document.createElement('option');
-            option.value = product.id;
-            option.textContent = `${product.name} (Stock: ${product.stock})`;
-            select.appendChild(option);
-          });
-        });
-      })
-      .catch((err) => console.error('Error loading products:', err));
-
-    // Add new item row
-    document.getElementById('addItemBtn').addEventListener('click', () => {
-      const itemDiv = document.createElement('div');
-      itemDiv.className = 'item mb-3';
-      itemDiv.innerHTML = `
-        <select class="form-select product-select" required>
-          <option value="">Select Product</option>
-        </select>
-        <input type="number" class="form-control mt-2 quantity" placeholder="Quantity" min="1" required>
-        <input type="text" class="form-control mt-2 unit" placeholder="Unit (e.g., tablets)" required>
-      `;
-      document.getElementById('items').appendChild(itemDiv);
-      window.api.fetchProducts().then(products => {
-        const select = itemDiv.querySelector('.product-select');
-        products.forEach(product => {
-          const option = document.createElement('option');
-          option.value = product.id;
-          option.textContent = `${product.name} (Stock: ${product.stock})`;
-          select.appendChild(option);
-        });
+    window.api.fetchProducts().then(products => {
+      const select = document.querySelector('.product-select');
+      products.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.id;
+        option.textContent = product.name;
+        select.appendChild(option);
       });
     });
 
-    // Toggle bank name field based on payment method
-    document.getElementById('paymentMethod').addEventListener('change', (e) => {
-      const bankNameDiv = document.getElementById('bankNameDiv');
-      if (e.target.value === 'Credit Card') {
-        bankNameDiv.classList.remove('hidden');
-        document.getElementById('bankName').required = true;
-      } else {
-        bankNameDiv.classList.add('hidden');
-        document.getElementById('bankName').required = false;
-        document.getElementById('bankName').value = '';
-      }
+    document.getElementById('addItemBtn').addEventListener('click', () => {
+      const item = document.querySelector('.item').cloneNode(true);
+      item.querySelector('.product-select').value = '';
+      item.querySelector('.quantity').value = '';
+      item.querySelector('.unit').value = '';
+      document.getElementById('items').appendChild(item);
     });
 
-    // Review invoice
     document.getElementById('reviewBtn').addEventListener('click', () => {
       const customer = document.getElementById('customer').value;
+      const salesRepresentative = document.getElementById('salesRepresentative').value;
       const date = document.getElementById('date').value;
       const invoiceNumber = document.getElementById('invoiceNumber').value;
       const invoiceType = document.getElementById('invoiceType').value;
       const paymentMethod = document.getElementById('paymentMethod').value;
       const bankName = document.getElementById('bankName').value;
       const discount = parseFloat(document.getElementById('discount').value) || 0;
+      const paidAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
       const items = [];
       let total = 0;
-    });
 
       const promises = [];
       document.querySelectorAll('.item').forEach(item => {
@@ -170,136 +199,118 @@
         );
       });
 
-document.getElementById('reviewBtn').addEventListener('click', () => {
-    console.log('Review button clicked');
-    const customer = document.getElementById('customer').value;
-    const salesRepresentative = document.getElementById('salesRepresentative').value;
-    const date = document.getElementById('date').value;
-    const invoiceNumber = document.getElementById('invoiceNumber').value;
-    const invoiceType = document.getElementById('invoiceType').value;
-    const paymentMethod = document.getElementById('paymentMethod').value;
-    const bankName = document.getElementById('bankName').value;
-    const discount = parseFloat(document.getElementById('discount').value) || 0;
-    const items = [];
-    let total = 0;
+      Promise.all(promises).then(() => {
+        const discountedTotal = total * (1 - discount / 100);
+        document.getElementById('reviewCustomer').textContent = customer;
+        document.getElementById('reviewSalesRepresentative').textContent = salesRepresentative;
+        document.getElementById('reviewDate').textContent = date;
+        document.getElementById('reviewInvoiceNumber').textContent = invoiceNumber;
+        document.getElementById('reviewInvoiceType').textContent = invoiceType;
+        document.getElementById('reviewPaymentMethod').textContent = paymentMethod;
+        document.getElementById('reviewBankName').textContent = bankName || 'N/A';
+        document.getElementById('reviewDiscount').textContent = discount;
+        document.getElementById('reviewPaidAmount').textContent = paidAmount.toFixed(2);
+        const reviewItems = document.getElementById('reviewItems');
+        reviewItems.innerHTML = '';
+        items.forEach(item => {
+          window.api.fetchProductById(item.productId).then(product => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${product.name}</td>
+              <td>${item.quantity}</td>
+              <td>${item.unit}</td>
+              <td>$${item.price.toFixed(2)}</td>
+              <td>$${item.cost.toFixed(2)}</td>
+            `;
+            reviewItems.appendChild(row);
+          });
+        });
+        document.getElementById('reviewTotal').textContent = discountedTotal.toFixed(2);
 
-    const promises = [];
-    document.querySelectorAll('.item').forEach(item => {
-      const productId = item.querySelector('.product-select').value;
-      const quantity = parseInt(item.querySelector('.quantity').value, 10);
-      const unit = item.querySelector('.unit').value;
-      console.log('Item:', { productId, quantity, unit });
-      promises.push(
-        window.api.fetchProductById(productId).then(product => {
-          console.log('Fetched product:', product);
-          const cost = product.price * quantity;
-          items.push({ productId, quantity, unit, price: product.price, cost });
-          total += cost;
-        }).catch(err => console.error('Error fetching product:', err))
-      );
+        document.getElementById('addInvoiceForm').classList.add('hidden');
+        document.getElementById('reviewSection').classList.remove('hidden');
+      });
     });
 
-    console.log('Promises created:', promises.length);
-    Promise.all(promises).then(() => {
-      console.log('Promises resolved, items:', items);
-      const discountedTotal = total * (1 - discount / 100);
-      document.getElementById('reviewCustomer').textContent = customer;
-      document.getElementById('reviewSalesRepresentative').textContent = salesRepresentative;
-      document.getElementById('reviewDate').textContent = date;
-      document.getElementById('reviewInvoiceNumber').textContent = invoiceNumber;
-      document.getElementById('reviewInvoiceType').textContent = invoiceType;
-      document.getElementById('reviewPaymentMethod').textContent = paymentMethod;
-      document.getElementById('reviewBankName').textContent = bankName || 'N/A';
-      document.getElementById('reviewDiscount').textContent = discount;
-      const reviewItems = document.getElementById('reviewItems');
-      reviewItems.innerHTML = '';
-      items.forEach(item => {
-        window.api.fetchProductById(item.productId).then(product => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${product.name}</td>
-            <td>${item.quantity}</td>
-            <td>${item.unit}</td>
-            <td>$${item.price.toFixed(2)}</td>
-            <td>$${item.cost.toFixed(2)}</td>
-          `;
-          reviewItems.appendChild(row);
-        });
-      });
-      document.getElementById('reviewTotal').textContent = discountedTotal.toFixed(2);
-
-      console.log('Showing review section');
-      document.getElementById('addInvoiceForm').classList.add('hidden');
-      document.getElementById('reviewSection').classList.remove('hidden');
-    }).catch(err => console.error('Promise.all failed:', err));
-  });
-
-    // Save invoice
     document.getElementById('saveBtn').addEventListener('click', () => {
       const invoice = {
         customer: document.getElementById('customer').value,
-        items: Array.from(document.querySelectorAll('.item')).map(item => ({
-          productId: item.querySelector('.product-select').value,
-          quantity: parseInt(item.querySelector('.quantity').value, 10),
-          unit: item.querySelector('.unit').value,
-          price: parseFloat(item.querySelector('.product-select option:checked').dataset.price || 0),
-          cost: parseFloat(item.querySelector('.product-select option:checked').dataset.price || 0) * parseInt(item.querySelector('.quantity').value, 10),
-        })),
-        total: parseFloat(document.getElementById('reviewTotal').textContent),
+        sales_representative: document.getElementById('salesRepresentative').value,
         date: document.getElementById('date').value,
         invoice_number: document.getElementById('invoiceNumber').value,
         invoice_type: document.getElementById('invoiceType').value,
         payment_method: document.getElementById('paymentMethod').value,
+        bank_name: document.getElementById('bankName').value || null,
         discount: parseFloat(document.getElementById('discount').value) || 0,
-        bank_name: document.getElementById('paymentMethod').value === 'Credit Card' ? document.getElementById('bankName').value : null,
+        paid_amount: parseFloat(document.getElementById('paidAmount').value) || 0,
+        items: Array.from(document.querySelectorAll('.item')).map(item => ({
+          productId: item.querySelector('.product-select').value,
+          quantity: parseInt(item.querySelector('.quantity').value, 10),
+          unit: item.querySelector('.unit').value,
+          price: item.querySelector('.product-select').selectedOptions[0].dataset.price,
+          cost: item.querySelector('.product-select').selectedOptions[0].dataset.price * parseInt(item.querySelector('.quantity').value, 10)
+        })),
+        total: parseFloat(document.getElementById('reviewTotal').textContent)
       };
       window.api.addInvoice(invoice)
         .then(() => window.close())
-        .catch((err) => console.error('Error saving invoice:', err));
+        .catch((err) => console.error('Error adding invoice:', err));
     });
 
-    document.getElementById('saveBtn').addEventListener('click', () => {
-    const invoice = {
-      customer: document.getElementById('customer').value,
-      sales_representative: document.getElementById('salesRepresentative').value,
-      // ... (other fields unchanged)
-    };
-    window.api.addInvoice(invoice)
-      .then(() => window.close())
-      .catch((err) => console.error('Error adding invoice:', err));
-  });
+    document.getElementById('printInvoiceBtn').addEventListener('click', () => {
+      const invoiceNumber = document.getElementById('invoiceNumber').value;
+      const issueDate = document.getElementById('date').value;
+      const printDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const claimingDate = new Date(new Date(issueDate).setDate(new Date(issueDate).getDate() + 30)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const discount = parseFloat(document.getElementById('discount').value) || 0;
+      const paidAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
+      const items = [];
+      let total = 0;
 
-    // Print invoice
-    document.getElementById('printBtn').addEventListener('click', () => {
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`
-        <html>
-        <head><title>Invoice</title></head>
-        <body>
-          <h2>Invoice</h2>
-          <p><strong>Customer:</strong> ${document.getElementById('reviewCustomer').textContent}</p>
-          <p><strong>Date:</strong> ${document.getElementById('reviewDate').textContent}</p>
-          <p><strong>Invoice Number:</strong> ${document.getElementById('reviewInvoiceNumber').textContent}</p>
-          <p><strong>Invoice Type:</strong> ${document.getElementById('reviewInvoiceType').textContent}</p>
-          <p><strong>Payment Method:</strong> ${document.getElementById('reviewPaymentMethod').textContent}</p>
-          <p><strong>Bank Name:</strong> ${document.getElementById('reviewBankName').textContent}</p>
-          <p><strong>Discount:</strong> ${document.getElementById('reviewDiscount').textContent}%</p>
-          <table border="1">
-            <thead><tr><th>Product</th><th>Quantity</th><th>Unit</th><th>Price</th><th>Cost</th></tr></thead>
-            <tbody>${document.getElementById('reviewItems').innerHTML}</tbody>
-          </table>
-          <p><strong>Total:</strong> $${document.getElementById('reviewTotal').textContent}</p>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    });
+      const promises = [];
+      document.querySelectorAll('.item').forEach(item => {
+        const productId = item.querySelector('.product-select').value;
+        const quantity = parseInt(item.querySelector('.quantity').value, 10);
+        promises.push(
+          window.api.fetchProductById(productId).then(product => {
+            const cost = product.price * quantity;
+            items.push({ productId, quantity, price: product.price, cost, name: product.name });
+            total += cost;
+          })
+        );
+      });
 
-    // Edit (go back to form)
-    document.getElementById('editBtn').addEventListener('click', () => {
-      document.getElementById('addInvoiceForm').classList.remove('hidden');
-      document.getElementById('reviewSection').classList.add('hidden');
+      Promise.all(promises).then(() => {
+        const discountedTotal = total * (1 - discount / 100);
+        const claimedAmount = discountedTotal - paidAmount;
+
+        document.getElementById('printInvoiceNumber').textContent = invoiceNumber;
+        document.getElementById('printDateIssued').textContent = printDate;
+        document.getElementById('printIssueDate').textContent = issueDate;
+        document.getElementById('printClaimDate').textContent = claimingDate;
+        const printItems = document.getElementById('printItems');
+        printItems.innerHTML = '';
+        items.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td style="border: 1px solid #000; padding: 8px;">${item.name}</td>
+            <td style="border: 1px solid #000; padding: 8px;">N/A</td>
+            <td style="border: 1px solid #000; padding: 8px;">${item.price.toFixed(2)} SDG</td>
+            <td style="border: 1px solid #000; padding: 8px;">${item.quantity}</td>
+            <td style="border: 1px solid #000; padding: 8px;">${item.cost.toFixed(2)} SDG</td>
+          `;
+          printItems.appendChild(row);
+        });
+        document.getElementById('printTotal').textContent = discountedTotal.toFixed(2) + ' SDG';
+        document.getElementById('printPaid').textContent = paidAmount.toFixed(2) + ' SDG';
+        document.getElementById('printClaimed').textContent = claimedAmount.toFixed(2) + ' SDG';
+
+        document.getElementById('reviewSection').classList.add('hidden');
+        document.getElementById('printInvoiceSection').classList.remove('hidden');
+        window.print();
+        document.getElementById('printInvoiceSection').classList.add('hidden');
+        document.getElementById('reviewSection').classList.remove('hidden');
+      });
     });
   </script>
 </body>

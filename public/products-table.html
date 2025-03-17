@@ -1,61 +1,147 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Product List</title>
+  <title>Products List</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
   <style>
-    .table-responsive { margin: 20px 0; }
+    /* Table Styling */
+    #products-datatables {
+      border-collapse: collapse;
+      width: 100%;
+      font-family: 'Arial', sans-serif;
+    }
+    #products-datatables th {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    #products-datatables td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    #products-datatables tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    #products-datatables tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    /* Ensure horizontal scrolling in normal view */
+    .dataTables_wrapper {
+      overflow-x: auto;
+    }
+
+    /* Print Styling */
+    @media print {
+      body * { visibility: hidden; }
+      .container, .container * { visibility: visible; }
+      .container {
+        position: static; /* Avoid absolute positioning issues */
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .dt-buttons, .no-print { display: none; } /* Hide buttons and Actions */
+      .print-header {
+        visibility: visible;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      #products-datatables {
+        width: 100%;
+        max-width: 297mm; /* A4 landscape width */
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="page-inner">
-      <div class="page-header">
-        <h3 class="fw-bold mb-3">DataTables.Net</h3>
-        <ul class="breadcrumbs mb-3">
-          <li class="nav-home"><a href="#"><i class="icon-home"></i></a></li>
-          <li class="separator"><i class="icon-arrow-right"></i></li>
-          <li class="nav-item"><a href="#">Tables</a></li>
-          <li class="separator"><i class="icon-arrow-right"></i></li>
-          <li class="nav-item"><a href="#">Datatables</a></li>
-        </ul>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-header">
-              <h4 class="card-title">Basic</h4>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table id="basic-datatables" class="display table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Price</th>
-                      <th>Stock</th>
-                      <th>Storage Location</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="container mt-4">
+    <h3>Products List</h3>
+    <div class="mb-3">
+      <a href="#" class="btn btn-label-success btn-round btn-sm me-2" id="exportExcelBtn">
+        <span class="btn-label"><i class="fa fa-pencil"></i></span> Export
+      </a>
+      <a href="#" class="btn btn-label-info btn-round btn-sm" id="printBtn">
+        <span class="btn-label"><i class="fa fa-print"></i></span> Print
+      </a>
     </div>
+    <div class="print-header" style="display: none;">
+      <h4>Products List - Printed on <span id="printDate"></span></h4>
+    </div>
+    <table id="products-datatables" class="display table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Storage Location</th>
+          <th class="no-print">Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+
   <script>
     $(document).ready(function () {
-      const table = $('#basic-datatables').DataTable({
+      const table = $('#products-datatables').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+          {
+            extend: 'excel',
+            text: '<i class="fa fa-pencil"></i> Export',
+            className: 'btn btn-label-success btn-round btn-sm me-2 d-none',
+            filename: 'Products_List',
+            exportOptions: {
+              columns: ':not(.no-print)'
+            }
+          },
+          {
+            extend: 'print',
+            text: '<i class="fa fa-print"></i> Print',
+            className: 'btn btn-label-info btn-round btn-sm d-none',
+            exportOptions: {
+              columns: ':not(.no-print)'
+            },
+            customize: function (win) {
+              $(win.document.body).css({
+                'font-size': '10pt',
+                'margin': '0',
+                'padding': '0'
+              });
+              $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
+              const printDate = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              });
+              $(win.document.body).prepend(`<h4 style="text-align: center; margin-bottom: 20px;">Products List - Printed on ${printDate}</h4>`);
+              $(win.document.body).find('.container').css({
+                'width': '297mm', // A4 landscape width
+                'max-width': '297mm',
+                'overflow': 'visible'
+              });
+            }
+          }
+        ],
         columns: [
           { data: 'id' },
           { data: 'name' },
@@ -70,6 +156,7 @@
                 <button class="btn btn-sm btn-danger delete-btn" data-id="${row.id}">Delete</button>
               `;
             },
+            className: 'no-print'
           },
         ],
       });
@@ -80,31 +167,41 @@
             table.clear();
             table.rows.add(products);
             table.draw();
-            console.log('Products loaded:', products);
           })
           .catch((err) => console.error('Error loading products:', err));
       }
 
-      // Initial load
       loadProducts();
-
-      // Update table on product added
       window.api.onProductAdded(() => loadProducts());
 
-      // Delete product
-      $('#basic-datatables').on('click', '.delete-btn', function () {
+      $(document).on('click', '.edit-btn', function () {
         const id = $(this).data('id');
-        if (confirm(`Are you sure you want to delete product ID ${id}?`)) {
+        window.api.openEditProductWindow(id);
+      });
+
+      $(document).on('click', '.delete-btn', function () {
+        const id = $(this).data('id');
+        if (confirm('Are you sure you want to delete this product?')) {
           window.api.deleteProduct(id)
             .then(() => loadProducts())
             .catch((err) => console.error('Error deleting product:', err));
         }
       });
 
-      // Edit product
-      $('#basic-datatables').on('click', '.edit-btn', function () {
-        const id = $(this).data('id');
-        window.api.openEditProductWindow(id);
+      $('#exportExcelBtn').on('click', function (e) {
+        e.preventDefault();
+        table.button(0).trigger();
+      });
+
+      $('#printBtn').on('click', function (e) {
+        e.preventDefault();
+        table.button(1).trigger();
+      });
+
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
     });
   </script>

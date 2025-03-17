@@ -1,89 +1,158 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Invoice List</title>
+  <title>Invoices List</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
   <style>
-    .table-responsive { margin: 20px 0; }
+    #invoices-datatables {
+      border-collapse: collapse;
+      width: 100%;
+      font-family: 'Arial', sans-serif;
+    }
+    #invoices-datatables th {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    #invoices-datatables td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    #invoices-datatables tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    #invoices-datatables tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .dataTables_wrapper {
+      overflow-x: auto;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      .container, .container * { visibility: visible; }
+      .container {
+        position: static;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .dt-buttons, .no-print { display: none; }
+      .print-header {
+        visibility: visible;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      #invoices-datatables {
+        width: 100%;
+        max-width: 297mm;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="page-inner">
-      <div class="page-header">
-        <h3 class="fw-bold mb-3">Invoice DataTables</h3>
-        <ul class="breadcrumbs mb-3">
-          <li class="nav-home"><a href="#"><i class="icon-home"></i></a></li>
-          <li class="separator"><i class="icon-arrow-right"></i></li>
-          <li class="nav-item"><a href="#">Tables</a></li>
-          <li class="separator"><i class="icon-arrow-right"></i></li>
-          <li class="nav-item"><a href="#">Datatables</a></li>
-        </ul>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-header">
-              <h4 class="card-title">Invoices</h4>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table id="invoices-datatables" class="display table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Customer</th>
-                      <th>Sales Representative</th> <!-- New column -->
-                      <th>Date</th>
-                      <th>Invoice Number</th>
-                      <th>Invoice Type</th>
-                      <th>Payment Method</th>
-                      <th>Bank Name</th>
-                      <th>Discount</th>
-                      <th>Product Name</th>
-                      <th>Cost</th>
-                      <th>Stock</th>
-                      <th>Quantity</th>
-                      <th>Unit</th>
-                      <th>Price</th>
-                      <th>Overall</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="container mt-4">
+    <h3>Invoices List</h3>
+    <div class="mb-3">
+      <a href="#" class="btn btn-label-success btn-round btn-sm me-2" id="exportExcelBtn">
+        <span class="btn-label"><i class="fa fa-pencil"></i></span> Export
+      </a>
+      <a href="#" class="btn btn-label-info btn-round btn-sm" id="printBtn">
+        <span class="btn-label"><i class="fa fa-print"></i></span> Print
+      </a>
     </div>
+    <div class="print-header" style="display: none;">
+      <h4>Invoices List - Printed on <span id="printDate"></span></h4>
+    </div>
+    <table id="invoices-datatables" class="display table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Sales Representative</th>
+          <th>Date</th>
+          <th>Invoice Number</th>
+          <th>Product Name</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th class="no-print">Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+
   <script>
     $(document).ready(function () {
+      console.log('Document ready');
       const table = $('#invoices-datatables').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+          {
+            extend: 'excel',
+            text: '<i class="fa fa-pencil"></i> Export',
+            className: 'btn btn-label-success btn-round btn-sm me-2 d-none',
+            filename: 'Invoices_List',
+            exportOptions: {
+              columns: ':not(.no-print)'
+            }
+          },
+          {
+            extend: 'print',
+            text: '<i class="fa fa-print"></i> Print',
+            className: 'btn btn-label-info btn-round btn-sm d-none',
+            exportOptions: {
+              columns: ':not(.no-print)'
+            },
+            customize: function (win) {
+              console.log('Print customize called');
+              $(win.document.body).css({
+                'font-size': '10pt',
+                'margin': '0',
+                'padding': '0'
+              });
+              $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
+              const printDate = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              });
+              $(win.document.body).prepend(`<h4 style="text-align: center; margin-bottom: 20px;">Invoices List - Printed on ${printDate}</h4>`);
+              $(win.document.body).find('.container').css({
+                'width': '297mm',
+                'max-width': '297mm',
+                'overflow': 'visible'
+              });
+            }
+          }
+        ],
         columns: [
           { data: 'id' },
           { data: 'customer' },
-          { data: 'sales_representative' }, // New column
+          { data: 'sales_representative' },
           { data: 'date' },
           { data: 'invoice_number' },
-          { data: 'invoice_type' },
-          { data: 'payment_method' },
-          { data: 'bank_name' },
-          { data: 'discount' },
           { data: 'productName' },
-          { data: 'cost' },
-          { data: 'stock' },
           { data: 'quantity' },
-          { data: 'unit' },
-          { data: 'price' },
-          { data: 'overall' },
+          { data: 'total' },
           {
             data: null,
             render: (data, type, row) => {
@@ -92,13 +161,16 @@
                 <button class="btn btn-sm btn-danger delete-btn" data-id="${row.id}">Delete</button>
               `;
             },
+            className: 'no-print'
           },
         ],
       });
 
       function loadInvoices() {
+        console.log('Loading invoices');
         window.api.fetchInvoices()
           .then((invoices) => {
+            console.log('Invoices fetched:', invoices);
             const rows = [];
             invoices.forEach(invoice => {
               const items = JSON.parse(invoice.items);
@@ -106,51 +178,66 @@
                 rows.push({
                   id: invoice.id,
                   customer: invoice.customer,
-                  sales_representative: invoice.sales_representative || 'N/A', // New field
+                  sales_representative: invoice.sales_representative || 'N/A',
                   date: invoice.date,
                   invoice_number: invoice.invoice_number,
-                  invoice_type: invoice.invoice_type,
-                  payment_method: invoice.payment_method,
-                  bank_name: invoice.bank_name || 'N/A',
-                  discount: invoice.discount,
                   productName: '',
-                  cost: item.cost,
-                  stock: item.stock,
                   quantity: item.quantity,
-                  unit: item.unit,
-                  price: item.price,
-                  overall: invoice.total,
+                  total: invoice.total,
                 });
-                window.api.fetchProductById(item.productId).then(product => {
-                  rows[rows.length - 1].productName = product.name;
-                  table.clear();
-                  table.rows.add(rows);
-                  table.draw();
-                });
+                window.api.fetchProductById(item.productId)
+                  .then(product => {
+                    console.log('Product fetched for item:', product);
+                    rows[rows.length - 1].productName = product ? product.name : 'Unknown';
+                    table.clear();
+                    table.rows.add(rows);
+                    table.draw();
+                  })
+                  .catch(err => console.error('Error fetching product:', err));
               });
             });
-            console.log('Invoices loaded:', rows);
           })
           .catch((err) => console.error('Error loading invoices:', err));
       }
 
       loadInvoices();
-      window.api.onInvoiceAdded(() => loadInvoices());
+      window.api.onInvoiceAdded(() => {
+        console.log('Invoice added event');
+        loadInvoices();
+      });
 
-      // Delete invoice
-      $('#invoices-datatables').on('click', '.delete-btn', function () {
+      $(document).on('click', '.edit-btn', function () {
         const id = $(this).data('id');
-        if (confirm(`Are you sure you want to delete invoice ID ${id}?`)) {
+        console.log('Edit button clicked for ID:', id);
+        window.api.openEditInvoiceWindow(id);
+      });
+
+      $(document).on('click', '.delete-btn', function () {
+        const id = $(this).data('id');
+        console.log('Delete button clicked for ID:', id);
+        if (confirm('Are you sure you want to delete this invoice?')) {
           window.api.deleteInvoice(id)
             .then(() => loadInvoices())
             .catch((err) => console.error('Error deleting invoice:', err));
         }
       });
 
-      // Edit invoice
-      $('#invoices-datatables').on('click', '.edit-btn', function () {
-        const id = $(this).data('id');
-        window.api.openEditInvoiceWindow(id);
+      $('#exportExcelBtn').on('click', function (e) {
+        e.preventDefault();
+        console.log('Export Excel clicked');
+        table.button(0).trigger();
+      });
+
+      $('#printBtn').on('click', function (e) {
+        e.preventDefault();
+        console.log('Print clicked');
+        table.button(1).trigger();
+      });
+
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
     });
   </script>
