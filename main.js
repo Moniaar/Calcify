@@ -182,6 +182,7 @@ ipcMain.handle('add-invoice', async (event, invoice) => {
   if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added');
   return result;
 });
+
 ipcMain.handle('delete-invoice', async (event, id) => {
   const result = await backend.deleteInvoice(id);
   if (mainWindow) mainWindow.webContents.send('invoice-added'); // Refresh counter

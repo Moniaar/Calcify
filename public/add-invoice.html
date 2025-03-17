@@ -4,6 +4,7 @@
   <title>Add Invoice</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
+    .hidden { display: none; }
     @media print {
       body * { visibility: hidden; }
       #printInvoiceSection, #printInvoiceSection * { visibility: visible; }
@@ -42,14 +43,14 @@
       </div>
       <div class="mb-3">
         <label for="invoiceType" class="form-label">Invoice Type</label>
-        <select class="form-select" id="invoiceType" required>
-          <option value="Cash">Cash</option>
-          <option value="Credit">Credit</option>
-        </select>
+        <input type="text" class="form-control" id="invoiceType" required>
       </div>
       <div class="mb-3">
         <label for="paymentMethod" class="form-label">Payment Method</label>
-        <input type="text" class="form-control" id="paymentMethod" required>
+        <select class="form-select" id="paymentMethod" required>
+          <option value="Cash">Cash</option>
+          <option value="Credit">Credit</option>
+        </select>
       </div>
       <div class="mb-3">
         <label for="bankName" class="form-label">Bank Name</label>
@@ -154,17 +155,23 @@
   </div>
 
   <script>
-    window.api.fetchProducts().then(products => {
-      const select = document.querySelector('.product-select');
-      products.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.id;
-        option.textContent = product.name;
-        select.appendChild(option);
-      });
-    });
+    console.log('Script loaded');
+    window.api.fetchProducts()
+      .then(products => {
+        console.log('Products fetched:', products);
+        const select = document.querySelector('.product-select');
+        products.forEach(product => {
+          const option = document.createElement('option');
+          option.value = product.id;
+          option.textContent = product.name;
+          option.dataset.price = product.price; // Store price for later use
+          select.appendChild(option);
+        });
+      })
+      .catch(err => console.error('Error fetching products:', err));
 
     document.getElementById('addItemBtn').addEventListener('click', () => {
+      console.log('Add Item clicked');
       const item = document.querySelector('.item').cloneNode(true);
       item.querySelector('.product-select').value = '';
       item.querySelector('.quantity').value = '';
@@ -173,6 +180,7 @@
     });
 
     document.getElementById('reviewBtn').addEventListener('click', () => {
+      console.log('Review Invoice clicked');
       const customer = document.getElementById('customer').value;
       const salesRepresentative = document.getElementById('salesRepresentative').value;
       const date = document.getElementById('date').value;
@@ -188,18 +196,22 @@
       const promises = [];
       document.querySelectorAll('.item').forEach(item => {
         const productId = item.querySelector('.product-select').value;
-        const quantity = parseInt(item.querySelector('.quantity').value, 10);
+        const quantity = parseInt(item.querySelector('.quantity').value, 10) || 0;
         const unit = item.querySelector('.unit').value;
-        promises.push(
-          window.api.fetchProductById(productId).then(product => {
-            const cost = product.price * quantity;
-            items.push({ productId, quantity, unit, price: product.price, cost });
-            total += cost;
-          })
-        );
+        if (productId && quantity) {
+          promises.push(
+            window.api.fetchProductById(productId).then(product => {
+              console.log('Product for review:', product);
+              const cost = product.price * quantity;
+              items.push({ productId, quantity, unit, price: product.price, cost });
+              total += cost;
+            }).catch(err => console.error('Error fetching product for review:', err))
+          );
+        }
       });
 
       Promise.all(promises).then(() => {
+        console.log('All products fetched, items:', items);
         const discountedTotal = total * (1 - discount / 100);
         document.getElementById('reviewCustomer').textContent = customer;
         document.getElementById('reviewSalesRepresentative').textContent = salesRepresentative;
@@ -219,8 +231,8 @@
               <td>${product.name}</td>
               <td>${item.quantity}</td>
               <td>${item.unit}</td>
-              <td>$${item.price.toFixed(2)}</td>
-              <td>$${item.cost.toFixed(2)}</td>
+              <td>${item.price.toFixed(2)} SDG</td>
+              <td>${item.cost.toFixed(2)} SDG</td>
             `;
             reviewItems.appendChild(row);
           });
@@ -229,10 +241,11 @@
 
         document.getElementById('addInvoiceForm').classList.add('hidden');
         document.getElementById('reviewSection').classList.remove('hidden');
-      });
+      }).catch(err => console.error('Review failed:', err));
     });
 
     document.getElementById('saveBtn').addEventListener('click', () => {
+      console.log('Save Invoice clicked');
       const invoice = {
         customer: document.getElementById('customer').value,
         sales_representative: document.getElementById('salesRepresentative').value,
@@ -246,18 +259,20 @@
         items: Array.from(document.querySelectorAll('.item')).map(item => ({
           productId: item.querySelector('.product-select').value,
           quantity: parseInt(item.querySelector('.quantity').value, 10),
-          unit: item.querySelector('.unit').value,
-          price: item.querySelector('.product-select').selectedOptions[0].dataset.price,
-          cost: item.querySelector('.product-select').selectedOptions[0].dataset.price * parseInt(item.querySelector('.quantity').value, 10)
+          unit: item.querySelector('.unit').value
         })),
         total: parseFloat(document.getElementById('reviewTotal').textContent)
       };
       window.api.addInvoice(invoice)
-        .then(() => window.close())
-        .catch((err) => console.error('Error adding invoice:', err));
+        .then(() => {
+          console.log('Invoice saved');
+          window.close();
+        })
+        .catch(err => console.error('Error adding invoice:', err));
     });
 
     document.getElementById('printInvoiceBtn').addEventListener('click', () => {
+      console.log('Print Invoice clicked');
       const invoiceNumber = document.getElementById('invoiceNumber').value;
       const issueDate = document.getElementById('date').value;
       const printDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -270,17 +285,21 @@
       const promises = [];
       document.querySelectorAll('.item').forEach(item => {
         const productId = item.querySelector('.product-select').value;
-        const quantity = parseInt(item.querySelector('.quantity').value, 10);
-        promises.push(
-          window.api.fetchProductById(productId).then(product => {
-            const cost = product.price * quantity;
-            items.push({ productId, quantity, price: product.price, cost, name: product.name });
-            total += cost;
-          })
-        );
+        const quantity = parseInt(item.querySelector('.quantity').value, 10) || 0;
+        if (productId && quantity) {
+          promises.push(
+            window.api.fetchProductById(productId).then(product => {
+              console.log('Product for print:', product);
+              const cost = product.price * quantity;
+              items.push({ productId, quantity, price: product.price, cost, name: product.name });
+              total += cost;
+            }).catch(err => console.error('Error fetching product for print:', err))
+          );
+        }
       });
 
       Promise.all(promises).then(() => {
+        console.log('Print items prepared:', items);
         const discountedTotal = total * (1 - discount / 100);
         const claimedAmount = discountedTotal - paidAmount;
 
@@ -310,7 +329,7 @@
         window.print();
         document.getElementById('printInvoiceSection').classList.add('hidden');
         document.getElementById('reviewSection').classList.remove('hidden');
-      });
+      }).catch(err => console.error('Print failed:', err));
     });
   </script>
 </body>
