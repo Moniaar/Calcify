@@ -217,6 +217,19 @@ function createEditInvoiceWindow(invoiceId) {
   editInvoiceWindow.on('closed', () => editInvoiceWindow = null);
 }
 
+ipcMain.on('open-client-balance-window', (event, customerName) => {
+  const balanceWindow = new BrowserWindow({
+    width: 400,
+    height: 300,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      enableRemoteModule: false,
+    },
+  });
+  balanceWindow.loadFile('public/client-balance.html', { query: { customer: customerName } });
+});
+
 ipcMain.on('open-add-product-window', () => {
   if (!addProductWindow) createAddProductWindow();
 });

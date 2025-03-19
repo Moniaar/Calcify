@@ -264,8 +264,45 @@
                         </div>
                       </li>
                       <li>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">الرصيد</a>
+                        <label for="clientBalanceSelect" class="form-label">View Client Balance</label>
+                        <select class="form-select" id="clientBalanceSelect">
+                          <option value="">Select a Client</option>
+                        </select>
+                        <script>
+                          document.addEventListener('DOMContentLoaded', () => {
+                            // Load Total Balance
+                            window.api.invoke('fetch-total-balance')
+                              .then(balance => {
+                                document.getElementById('totalBalance').textContent = `${balance.toFixed(2)} SDG`;
+                              })
+                              .catch(err => {
+                                console.error('Error fetching balance:', err);
+                                document.getElementById('totalBalance').textContent = 'Error';
+                              });
+                      
+                            // Load Customers into Dropdown
+                            window.api.invoke('fetch-customers')
+                              .then(customers => {
+                                const select = document.getElementById('clientBalanceSelect');
+                                customers.forEach(customer => {
+                                  const option = document.createElement('option');
+                                  option.value = customer;
+                                  option.textContent = customer;
+                                  select.appendChild(option);
+                                });
+                              })
+                              .catch(err => console.error('Error fetching customers:', err));
+                      
+                            // Open Client Balance Window on Selection
+                            document.getElementById('clientBalanceSelect').addEventListener('change', (e) => {
+                              const customerName = e.target.value;
+                              if (customerName) {
+                                window.api.send('open-client-balance-window', customerName);
+                                e.target.value = ''; // Reset dropdown
+                              }
+                            });
+                          });
+                        </script>
                     </div>
                   </ul>
                 </li>
