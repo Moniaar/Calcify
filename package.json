@@ -26,6 +26,7 @@
     "datatables.net-buttons": "^3.2.2",
     "electron-store": "^10.0.1",
     "express": "^4.21.2",
+    "flatpickr": "^4.6.13",
     "jszip": "^3.10.1",
     "pdfkit": "^0.16.0",
     "sqlite3": "^5.1.7"

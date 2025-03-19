@@ -234,21 +234,6 @@
                     </div>
                   </div>
                 </li>
-                <script>
-                  document.getElementById('clientBalanceSelect').addEventListener('change', (e) => {
-                    const customerName = e.target.value;
-                    if (customerName) {
-                      window.api.send('open-client-balance-window', customerName);
-                      e.target.value = '';
-                    }
-                  });
-              </script>
-
-      // Calendar Button
-      document.getElementById('calendarBtn').addEventListener('click', () => {
-        window.api.send('open-calendar-window');
-      });
-                </script>
 
                 <li class="nav-item topbar-user dropdown hidden-caret">
                   <a
@@ -407,10 +392,12 @@
                 </div>
               </div>
             </div>
-            <button id="addProductBtn" class="btn btn-primary mt-3">Add Product</button>
-            <button id="viewProductsBtn" class="btn btn-secondary mt-3 ms-2">View Product List</button>
-            <button id="addInvoiceBtn" class="btn btn-primary mt-3 ms-2">Add Invoice</button>
-            <button id="viewInvoicesBtn" class="btn btn-secondary mt-3 ms-2">View Invoice List</button>
+            <div class="d-flex justify-content-between mt-3">
+              <button id="addProductBtn" class="btn btn-primary">Add Product</button>
+              <button id="viewProductsBtn" class="btn btn-secondary">View Product List</button>
+              <button id="addInvoiceBtn" class="btn btn-primary">Add Invoice</button>
+              <button id="viewInvoicesBtn" class="btn btn-secondary">View Invoice List</button>
+            </div>
           </div>
         
           <script>
@@ -492,48 +479,49 @@
                     </div>
                   </div>
               </div>
-              <div class="col-md-4">
-                <div class="card card-primary card-round">
-                  <div class="card-header">
-                    <div class="card-head-row">
-                      <div class="card-title">Daily Sales</div>
+              <!-- Daily Sales and Map Section -->
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="card card-primary card-round">
+                    <div class="card-header">
+                      <div class="card-head-row">
+                        <div class="card-title">Daily Sales</div>
+                      </div>
+                      <div class="card-category">March 25 - April 02</div>
                     </div>
-                    <div class="card-category">March 25 - April 02</div>
-                  </div>
-                  <div class="card-body pb-0">
-                    <div class="mb-4 mt-2">
-                      <h1>$4,578.58</h1>
+                    <div class="card-body pb-0">
+                      <div class="mb-4 mt-2">
+                        <h1>$4,578.58</h1>
+                      </div>
+                      <div class="pull-in">
+                        <canvas id="dailySalesChart"></canvas>
+                      </div>
                     </div>
-                    <div class="pull-in">
-                      <canvas id="dailySalesChart"></canvas>
-                    </div>
-                  </div>
-                </div>
-                </div>
-              </div>
-            </div>
-            <div class="page-category">Help users find your address.</div>
-            <div class="row">
-              <div class="col-md-12">
-                <div class="card">
-                  <div class="card-header">
-                    <div class="card-title">Our Location</div>
-                  </div>
-                  <div class="card-body">
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63536.63871717301!2d95.32870249999999!3d5.5611019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3040377ae63dbcdf%3A0x3039d80b220cb90!2sBanda%20Aceh%2C%20Kota%20Banda%20Aceh%2C%20Aceh!5e0!3m2!1sid!2sid!4v1701054428265!5m2!1sid!2sid"
-                      width="600"
-                      height="450"
-                      style="border: 0; width: 100%"
-                      allowfullscreen=""
-                      loading="lazy"
-                      referrerpolicy="no-referrer-when-downgrade"
-                    ></iframe>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+              <!-- Add spacing before map -->
+              <div class="page-category mt-4 mb-4">Help users find your address.</div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="card-title">Our Location</div>
+                    </div>
+                    <div class="card-body">
+                      <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63536.63871717301!2d95.32870249999999!3d5.5611019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3040377ae63dbcdf%3A0x3039d80b220cb90!2sBanda%20Aceh%2C%20Kota%20Banda%20Aceh%2C%20Aceh!5e0!3m2!1sid!2sid!4v1701054428265!5m2!1sid!2sid"
+                        width="600"
+                        height="450"
+                        style="border: 0; width: 100%"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                      ></iframe>
+                    </div>
+                  </div>
+                </div>
+              </div>
             <!-- Footer starts from here -->
 
         <footer class="footer">

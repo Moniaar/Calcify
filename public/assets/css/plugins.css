@@ -5748,7 +5748,9 @@ div.table-responsive > div.dataTables_wrapper > div.row {
 
 @media (min-width: 768px) {
   .form-inline .select2-container--bootstrap {
-    display: inline-block; } }
+    display: inline-block;
+    position: absolute;
+    top: 67%; } }
 /*      Bootstrap Tagsinput     */
 .bootstrap-tagsinput {
   background-color: #ffffff;

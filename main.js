@@ -230,19 +230,6 @@ ipcMain.on('open-client-balance-window', (event, customerName) => {
   balanceWindow.loadFile('public/client-balance.html', { query: { customer: customerName } });
 });
 
-ipcMain.on('open-calendar-window', () => {
-  const calendarWindow = new BrowserWindow({
-    width: 300,
-    height: 400,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      enableRemoteModule: false,
-    },
-  });
-  calendarWindow.loadFile('public/calendar.html');
-});
-
 ipcMain.on('open-add-product-window', () => {
   if (!addProductWindow) createAddProductWindow();
 });
