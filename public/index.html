@@ -234,6 +234,21 @@
                     </div>
                   </div>
                 </li>
+                <script>
+                  document.getElementById('clientBalanceSelect').addEventListener('change', (e) => {
+                    const customerName = e.target.value;
+                    if (customerName) {
+                      window.api.send('open-client-balance-window', customerName);
+                      e.target.value = '';
+                    }
+                  });
+              </script>
+
+      // Calendar Button
+      document.getElementById('calendarBtn').addEventListener('click', () => {
+        window.api.send('open-calendar-window');
+      });
+                </script>
 
                 <li class="nav-item topbar-user dropdown hidden-caret">
                   <a
@@ -255,19 +270,11 @@
                             <h4>Jawaher</h4>
                             <p class="text-muted">0900886072</p>
                             <p class="text-muted">+249125877125</p>
-                            <a
-                              href="profile.html"
-                              class="btn btn-xs btn-secondary btn-sm"
-                              ></a
-                            >
                           </div>
                         </div>
                       </li>
                       <li>
-                        <label for="clientBalanceSelect" class="form-label">View Client Balance</label>
-                        <select class="form-select" id="clientBalanceSelect">
-                          <option value="">Select a Client</option>
-                        </select>
+                        <h4 class="card-title" id="salesTotal">$0.00</h4>
                         <script>
                           document.addEventListener('DOMContentLoaded', () => {
                             // Load Total Balance

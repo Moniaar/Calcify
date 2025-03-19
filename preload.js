@@ -21,4 +21,7 @@ contextBridge.exposeInMainWorld('api', {
   openEditInvoiceWindow: (id) => ipcRenderer.send('open-edit-invoice-window', id),
   onProductAdded: (callback) => ipcRenderer.on('product-added', callback),
   onInvoiceAdded: (callback) => ipcRenderer.on('invoice-added', callback),
+  send: (channel, data) => ipcRenderer.send(channel, data),
+  invoke: (channel, data) => ipcRenderer.invoke(channel, data),
+  on: (channel, func) => ipcRenderer.on(channel, (event, ...args) => func(...args)),
 });
