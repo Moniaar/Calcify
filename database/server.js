@@ -160,7 +160,48 @@ function createBackend(db) {
         });
       });
     },
+    fetchTotalBalance: () => {
+      return new Promise((resolve, reject) => {
+        db.get(
+          'SELECT SUM(total) as totalRevenue, SUM(paid_amount) as totalPaid FROM invoices',
+          [],
+          (err, row) => {
+            if (err) reject(err);
+            else {
+              const balance = (row.totalRevenue || 0) - (row.totalPaid || 0);
+              resolve(balance);
+            }
+          }
+        );
+      });
+    },
+
+    fetchClientBalance: (customerName) => {
+      return new Promise((resolve, reject) => {
+        db.get(
+          'SELECT SUM(total) as totalInvoiced, SUM(paid_amount) as totalPaid FROM invoices WHERE customer = ?',
+          [customerName],
+          (err, row) => {
+            if (err) reject(err);
+            else {
+              const balance = (row.totalInvoiced || 0) - (row.totalPaid || 0);
+              resolve(balance);
+            }
+          }
+        );
+      });
+    },
+
+    fetchCustomers: () => {
+      return new Promise((resolve, reject) => {
+        db.all('SELECT DISTINCT customer FROM invoices', [], (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows.map(row => row.customer));
+        });
+      });
+    },
   };
 }
+
 
 module.exports = createBackend;
