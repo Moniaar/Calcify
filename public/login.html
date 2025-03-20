@@ -49,33 +49,45 @@
       const toggleSignup = document.getElementById('toggleSignup');
       const toggleLogin = document.getElementById('toggleLogin');
       const formTitle = document.getElementById('formTitle');
-
+  
       toggleSignup.addEventListener('click', () => {
         loginForm.style.display = 'none';
         signupForm.style.display = 'block';
         formTitle.textContent = 'Sign Up';
       });
-
+  
       toggleLogin.addEventListener('click', () => {
         signupForm.style.display = 'none';
         loginForm.style.display = 'block';
         formTitle.textContent = 'Login';
       });
-
+  
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        console.log('Login form submitted');
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
+        console.log('Attempting login with:', { username, password });
+        if (!window.api) {
+          console.error('window.api is not defined');
+          return;
+        }
         window.api.invoke('login', { username, password })
           .then((success) => {
-            if (success) window.api.send('login-success');
-            else alert('Login failed: Invalid credentials');
+            console.log('Login result:', success);
+            if (success) {
+              console.log('Sending login-success');
+              window.api.send('login-success');
+            } else {
+              alert('Login failed: Invalid credentials');
+            }
           })
-          .catch(err => console.error('Login error:', err));
+          .catch(err => console.error('Login invoke error:', err));
       });
-
+  
       signupForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        console.log('Signup form submitted');
         const username = document.getElementById('signupUsername').value;
         const password = document.getElementById('signupPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
@@ -85,6 +97,7 @@
         }
         window.api.invoke('signup', { username, password })
           .then((success) => {
+            console.log('Signup result:', success);
             if (success) {
               alert('Sign up successful! Please log in.');
               signupForm.style.display = 'none';

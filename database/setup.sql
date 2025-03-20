@@ -29,3 +29,9 @@ CREATE TABLE IF NOT EXISTS invoices (
   sales_representative TEXT NOT NULL,
   paid_amount REAL DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL
+);

@@ -43,6 +43,7 @@ const backend = createBackend(db);
 
 let mainWindow;
 function createMainWindow() {
+  console.log('Main: Creating main window');
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -53,7 +54,13 @@ function createMainWindow() {
       nodeIntegration: false,
     },
   });
-  mainWindow.loadFile('public/index.html');
+  mainWindow.loadFile('public/index.html')
+    .then(() => console.log('Main: index.html loaded successfully'))
+    .catch(err => console.error('Main: Error loading index.html:', err));
+  mainWindow.on('closed', () => {
+    console.log('Main: Main window closed');
+    mainWindow = null;
+  });
 }
 
 let addProductWindow;
@@ -154,20 +161,107 @@ function createEditInvoiceWindow(invoiceId) {
   editInvoiceWindow.on('closed', () => editInvoiceWindow = null);
 }
 
+let loginWindow;
+function createLoginWindow() {
+  loginWindow = new BrowserWindow({
+    width: 400,
+    height: 500,
+    resizable: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      enableRemoteModule: false,
+      nodeIntegration: false,
+    },
+  });
+  loginWindow.loadFile('public/login.html')
+    .then(() => console.log('Main: login.html loaded successfully'))
+    .catch(err => console.error('Main: Error loading login.html:', err));
+  loginWindow.on('closed', () => {
+    console.log('Main: Login window closed manually');
+    loginWindow = null;
+    if (!mainWindow) app.quit(); // Quit only if mainWindow isn’t open
+  });
+}
+
 app.whenReady().then(() => {
   initializeDatabase();
-  createMainWindow();
+  createLoginWindow();
+});
+
+let isQuitting = false;
+app.on('before-quit', () => {
+  isQuitting = true;
 });
 
 app.on('window-all-closed', () => {
+  console.log('Main: All windows closed');
   db.close((err) => {
     if (err) console.error('Error closing database:', err);
     else console.log('Database closed');
   });
-  if (process.platform !== 'darwin') app.quit();
+  if (process.platform !== 'darwin' && isQuitting) {
+    console.log('Main: Quitting app');
+    app.quit();
+  }
 });
 
-// IPC Handlers
+// IPC Handlers for Login/Signup
+ipcMain.handle('login', async (event, { username, password }) => {
+  return new Promise((resolve) => {
+    console.log('Main: Handling login for', { username, password });
+    db.get('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, row) => {
+      if (err) {
+        console.error('Main: Login query error:', err);
+        resolve(false);
+      } else {
+        console.log('Main: Login query result:', row ? 'User found' : 'No user found');
+        resolve(!!row);
+      }
+    });
+  });
+});
+
+ipcMain.handle('signup', async (event, { username, password }) => {
+  return new Promise((resolve) => {
+    console.log('Main: Handling signup for', { username });
+    db.get('SELECT * FROM users WHERE username = ?', [username], (err, row) => {
+      if (err) {
+        console.error('Main: Signup check error:', err);
+        resolve(false);
+      } else if (row) {
+        console.log('Main: Username already exists');
+        resolve(false);
+      } else {
+        db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, password], (err) => {
+          if (err) {
+            console.error('Main: Signup insert error:', err);
+            resolve(false);
+          } else {
+            console.log('Main: User signed up successfully');
+            resolve(true);
+          }
+        });
+      }
+    });
+  });
+});
+
+ipcMain.on('login-success', () => {
+  console.log('Main: Login success received, opening main window');
+  if (loginWindow) {
+    loginWindow.close();
+    console.log('Main: Login window closed');
+    loginWindow = null;
+  }
+  if (!mainWindow) {
+    createMainWindow();
+  } else {
+    console.log('Main: Main window already exists');
+  }
+});
+
+// Remaining IPC Handlers
 ipcMain.handle('fetch-products', async () => backend.fetchProducts());
 ipcMain.handle('add-product', async (event, product) => {
   const result = await backend.addProduct(product);
@@ -208,7 +302,7 @@ ipcMain.handle('edit-invoice', async (event, invoice) => {
   return result;
 });
 ipcMain.handle('fetch-invoice-by-id', async (event, id) => backend.fetchInvoiceById(id));
-ipcMain.handle('fetch-sales-total', async () => backend.fetchSalesTotal()); // Removed duplicate
+ipcMain.handle('fetch-sales-total', async () => backend.fetchSalesTotal());
 ipcMain.handle('fetch-unique-customer-count', async () => backend.fetchUniqueCustomerCount());
 ipcMain.handle('fetch-total-balance', async () => backend.fetchTotalBalance());
 ipcMain.handle('fetch-client-balance', async (event, customerName) => backend.fetchClientBalance(customerName));
