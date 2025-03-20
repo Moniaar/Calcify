@@ -179,20 +179,9 @@ ipcMain.handle('edit-product', async (event, product) => {
 ipcMain.handle('fetch-product-by-id', async (event, id) => backend.fetchProductById(id));
 ipcMain.handle('fetch-invoices', async () => backend.fetchInvoices());
 
-ipcMain.handle('fetch-sales-total', async () => {
-  try {
-    const total = await backend.fetchSalesTotal();
-    console.log('Main: Sending sales total to renderer:', total);
-    return total;
-  } catch (err) {
-    console.error('Main: Error in fetch-sales-total:', err);
-    throw err;
-  }
-});
-
 ipcMain.handle('add-invoice', async (event, invoice) => {
   const result = await backend.addInvoice(invoice);
-  mainWindow.webContents.send('invoice-added'); // Notify renderer
+  mainWindow.webContents.send('invoice-added'); // Notify main window
   return result;
 });
 
