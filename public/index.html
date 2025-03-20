@@ -380,6 +380,19 @@
                   </div>
                 </div>
               </div>
+              <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                  // Load Total Balance
+                  window.api.invoke('fetch-total-balance')
+                    .then(balance => {
+                      document.getElementById('totalBalance').textContent = `${balance.toFixed(2)} SDG`;
+                    })
+                    .catch(err => {
+                      console.error('Error fetching balance:', err);
+                      document.getElementById('totalBalance').textContent = 'Error';
+                    });
+                  });
+              </script>
               <div class="col-sm-6 col-md-3">
                 <div class="card card-stats card-round">
                   <div class="card-body">
@@ -493,16 +506,16 @@
                   <div class="card card-primary card-round">
                     <div class="card-header">
                       <div class="card-head-row">
-                        <div class="card-title">Daily Sales</div>
+                        <div class="card-title">Weekly Sales</div>
                       </div>
-                      <div class="card-category">March 25 - April 02</div>
+                      <div class="card-category" id="weekRange">Loading...</div>
                     </div>
                     <div class="card-body pb-0">
                       <div class="mb-4 mt-2">
-                        <h1>$4,578.58</h1>
+                        <h1 id="weeklySalesTotal">$0.00</h1>
                       </div>
                       <div class="pull-in">
-                        <canvas id="dailySalesChart"></canvas>
+                        <canvas id="weeklySalesChart"></canvas> <!-- Renamed for clarity -->
                       </div>
                     </div>
                   </div>
