@@ -50,14 +50,6 @@ function createBackend(db) {
         });
       });
     },
-    fetchProductById: (id) => {
-      return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM products WHERE id = ?', [id], (err, row) => {
-          if (err) reject(err);
-          else resolve(row || null);
-        });
-      });
-    },
     fetchInvoices: () => {
       return new Promise((resolve, reject) => {
         db.all('SELECT * FROM invoices', [], (err, rows) => {
@@ -71,7 +63,7 @@ function createBackend(db) {
         db.serialize(() => {
           db.run(
             'INSERT INTO invoices (customer, items, total, date, invoice_number, invoice_type, payment_method, discount, bank_name, sales_representative, paid_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount, bank_name || null, sales_representative, paid_amount], // Line 74-ish
+            [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount || 0, bank_name || null, sales_representative, paid_amount || 0],
             function (err) {
               if (err) return reject(err);
               const invoiceId = this.lastID;
@@ -110,7 +102,7 @@ function createBackend(db) {
 
             db.run(
               'UPDATE invoices SET customer = ?, items = ?, total = ?, date = ?, invoice_number = ?, invoice_type = ?, payment_method = ?, discount = ?, bank_name = ?, sales_representative = ? WHERE id = ?',
-              [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount, bank_name || null, sales_representative, id],
+              [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount || 0, bank_name || null, sales_representative, id],
               function (err) {
                 if (err) return reject(err);
 
@@ -142,20 +134,14 @@ function createBackend(db) {
     fetchSalesTotal: () => {
       return new Promise((resolve, reject) => {
         db.get('SELECT SUM(total) as totalSales FROM invoices', [], (err, row) => {
-          if (err) {
-            console.error('DB: Error fetching sales total:', err);
-            reject(err);
-          } else {
-            const total = row.totalSales || 0;
-            console.log('DB: Sales total calculated:', total);
-            resolve(total);
-          }
+          if (err) reject(err);
+          else resolve(row.totalSales || 0);
         });
       });
     },
     fetchUniqueCustomerCount: () => {
       return new Promise((resolve, reject) => {
-        db.get('SELECT COUNT(DISTINCT customer) as count FROM invoices', (err, row) => {
+        db.get('SELECT COUNT(DISTINCT customer) as count FROM invoices', [], (err, row) => {
           if (err) reject(err);
           else resolve(row.count || 0);
         });
@@ -176,7 +162,6 @@ function createBackend(db) {
         );
       });
     },
-
     fetchClientBalance: (customerName) => {
       return new Promise((resolve, reject) => {
         db.get(
@@ -192,7 +177,6 @@ function createBackend(db) {
         );
       });
     },
-
     fetchWeeklySalesTotal: (start, end) => {
       return new Promise((resolve, reject) => {
         db.get(
@@ -205,7 +189,6 @@ function createBackend(db) {
         );
       });
     },
-
     fetchWeeklySalesByDay: (start, end) => {
       return new Promise((resolve, reject) => {
         db.all(
@@ -229,7 +212,6 @@ function createBackend(db) {
         );
       });
     },
-
     fetchCustomers: () => {
       return new Promise((resolve, reject) => {
         db.all('SELECT DISTINCT customer FROM invoices', [], (err, rows) => {
@@ -240,6 +222,5 @@ function createBackend(db) {
     },
   };
 }
-
 
 module.exports = createBackend;

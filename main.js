@@ -18,7 +18,6 @@ function initializeDatabase() {
     else console.log('Database initialized successfully');
   });
 
-  // Add new columns to existing invoices table
   const alterQueries = [
     "ALTER TABLE invoices ADD COLUMN date TEXT",
     "ALTER TABLE invoices ADD COLUMN invoice_number TEXT",
@@ -35,8 +34,6 @@ function initializeDatabase() {
     db.run(query, (err) => {
       if (err && !err.message.includes('duplicate column name')) {
         console.error('Error altering table:', err);
-      } else {
-        console.log('Table altered successfully or column already exists');
       }
     });
   });
@@ -140,79 +137,6 @@ function createInvoicesTableWindow() {
   invoicesTableWindow.on('closed', () => invoicesTableWindow = null);
 }
 
-app.whenReady().then(() => {
-  initializeDatabase();
-  createMainWindow();
-});
-
-app.on('window-all-closed', () => {
-  db.close((err) => {
-    if (err) console.error('Error closing database:', err);
-    else console.log('Database closed');
-  });
-  if (process.platform !== 'darwin') app.quit();
-});
-
-// IPC handlers
-
-ipcMain.handle('fetch-products', async () => backend.fetchProducts());
-
-ipcMain.handle('add-product', async (event, product) => {
-  const result = await backend.addProduct(product);
-  if (mainWindow) mainWindow.webContents.send('product-added');
-  if (productsTableWindow) productsTableWindow.webContents.send('product-added');
-  return result;
-});
-
-ipcMain.handle('delete-product', async (event, id) => {
-  const result = await backend.deleteProduct(id);
-  if (mainWindow) mainWindow.webContents.send('product-added');
-  if (productsTableWindow) productsTableWindow.webContents.send('product-added');
-  return result;
-});
-ipcMain.handle('edit-product', async (event, product) => {
-  const result = await backend.editProduct(product);
-  if (mainWindow) mainWindow.webContents.send('product-added');
-  if (productsTableWindow) productsTableWindow.webContents.send('product-added');
-  return result;
-});
-ipcMain.handle('fetch-product-by-id', async (event, id) => backend.fetchProductById(id));
-ipcMain.handle('fetch-invoices', async () => backend.fetchInvoices());
-
-ipcMain.handle('fetch-sales-total', async () => {
-  try {
-    const total = await backend.fetchSalesTotal();
-    console.log('Main: Sending sales total to renderer:', total);
-    return total;
-  } catch (err) {
-    console.error('Main: Error in fetch-sales-total:', err);
-    throw err;
-  }
-});
-
-ipcMain.handle('add-invoice', async (event, invoice) => {
-  const result = await backend.addInvoice(invoice);
-  mainWindow.webContents.send('invoice-added'); // Notify renderer
-  return result;
-});
-
-ipcMain.handle('delete-invoice', async (event, id) => {
-  const result = await backend.deleteInvoice(id);
-  if (mainWindow) mainWindow.webContents.send('invoice-added'); // Refresh counter
-  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added'); // Refresh table
-  return result;
-});
-ipcMain.handle('edit-invoice', async (event, invoice) => {
-  const result = await backend.editInvoice(invoice);
-  if (mainWindow) mainWindow.webContents.send('invoice-added');
-  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added');
-  return result;
-});
-ipcMain.handle('fetch-invoice-by-id', async (event, id) => backend.fetchInvoiceById(id));
-ipcMain.handle('fetch-sales-total', async () => backend.fetchSalesTotal());
-ipcMain.handle('fetch-unique-customer-count', async () => backend.fetchUniqueCustomerCount());
-
-// Window creation functions
 let editInvoiceWindow;
 function createEditInvoiceWindow(invoiceId) {
   editInvoiceWindow = new BrowserWindow({
@@ -229,6 +153,68 @@ function createEditInvoiceWindow(invoiceId) {
   editInvoiceWindow.loadFile('public/edit-invoice.html', { query: { id: invoiceId } });
   editInvoiceWindow.on('closed', () => editInvoiceWindow = null);
 }
+
+app.whenReady().then(() => {
+  initializeDatabase();
+  createMainWindow();
+});
+
+app.on('window-all-closed', () => {
+  db.close((err) => {
+    if (err) console.error('Error closing database:', err);
+    else console.log('Database closed');
+  });
+  if (process.platform !== 'darwin') app.quit();
+});
+
+// IPC Handlers
+ipcMain.handle('fetch-products', async () => backend.fetchProducts());
+ipcMain.handle('add-product', async (event, product) => {
+  const result = await backend.addProduct(product);
+  if (mainWindow) mainWindow.webContents.send('product-added');
+  if (productsTableWindow) productsTableWindow.webContents.send('product-added');
+  return result;
+});
+ipcMain.handle('delete-product', async (event, id) => {
+  const result = await backend.deleteProduct(id);
+  if (mainWindow) mainWindow.webContents.send('product-deleted');
+  if (productsTableWindow) productsTableWindow.webContents.send('product-deleted');
+  return result;
+});
+ipcMain.handle('edit-product', async (event, product) => {
+  const result = await backend.editProduct(product);
+  if (mainWindow) mainWindow.webContents.send('product-edited');
+  if (productsTableWindow) productsTableWindow.webContents.send('product-edited');
+  return result;
+});
+ipcMain.handle('fetch-product-by-id', async (event, id) => backend.fetchProductById(id));
+ipcMain.handle('fetch-invoices', async () => backend.fetchInvoices());
+ipcMain.handle('add-invoice', async (event, invoice) => {
+  const result = await backend.addInvoice(invoice);
+  if (mainWindow) mainWindow.webContents.send('invoice-added');
+  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added');
+  return result;
+});
+ipcMain.handle('delete-invoice', async (event, id) => {
+  const result = await backend.deleteInvoice(id);
+  if (mainWindow) mainWindow.webContents.send('invoice-deleted');
+  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-deleted');
+  return result;
+});
+ipcMain.handle('edit-invoice', async (event, invoice) => {
+  const result = await backend.editInvoice(invoice);
+  if (mainWindow) mainWindow.webContents.send('invoice-edited');
+  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-edited');
+  return result;
+});
+ipcMain.handle('fetch-invoice-by-id', async (event, id) => backend.fetchInvoiceById(id));
+ipcMain.handle('fetch-sales-total', async () => backend.fetchSalesTotal()); // Removed duplicate
+ipcMain.handle('fetch-unique-customer-count', async () => backend.fetchUniqueCustomerCount());
+ipcMain.handle('fetch-total-balance', async () => backend.fetchTotalBalance());
+ipcMain.handle('fetch-client-balance', async (event, customerName) => backend.fetchClientBalance(customerName));
+ipcMain.handle('fetch-weekly-sales-total', async (event, { start, end }) => backend.fetchWeeklySalesTotal(start, end));
+ipcMain.handle('fetch-weekly-sales-by-day', async (event, { start, end }) => backend.fetchWeeklySalesByDay(start, end));
+ipcMain.handle('fetch-customers', async () => backend.fetchCustomers());
 
 ipcMain.on('open-client-balance-window', (event, customerName) => {
   const balanceWindow = new BrowserWindow({
@@ -260,12 +246,4 @@ ipcMain.on('open-invoices-table-window', () => {
 });
 ipcMain.on('open-edit-invoice-window', (event, id) => {
   if (!editInvoiceWindow) createEditInvoiceWindow(id);
-});
-
-ipcMain.handle('fetch-weekly-sales-total', async (event, { start, end }) => {
-  return await backend.fetchWeeklySalesTotal(start, end);
-});
-
-ipcMain.handle('fetch-weekly-sales-by-day', async (event, { start, end }) => {
-  return await backend.fetchWeeklySalesByDay(start, end);
 });
