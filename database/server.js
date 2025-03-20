@@ -66,25 +66,20 @@ function createBackend(db) {
         });
       });
     },
-    addInvoice: ({ customer, items, total, date, invoice_number, invoice_type, payment_method, discount, bank_name, sales_representative }) => {
+    addInvoice: ({ customer, items, total, date, invoice_number, invoice_type, payment_method, discount, bank_name, sales_representative, paid_amount }) => {
       return new Promise((resolve, reject) => {
         db.serialize(() => {
           db.run(
             'INSERT INTO invoices (customer, items, total, date, invoice_number, invoice_type, payment_method, discount, bank_name, sales_representative, paid_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount, bank_name || null, sales_representative, paid_amount],
+            [customer, JSON.stringify(items), total, date, invoice_number, invoice_type, payment_method, discount, bank_name || null, sales_representative, paid_amount], // Line 74-ish
             function (err) {
               if (err) return reject(err);
               const invoiceId = this.lastID;
-
               const parsedItems = JSON.parse(JSON.stringify(items));
               parsedItems.forEach(item => {
-                db.run(
-                  'UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?',
-                  [item.quantity, item.productId, item.quantity],
-                  (err) => {
-                    if (err) reject(err);
-                  }
-                );
+                db.run('UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?', [item.quantity, item.productId, item.quantity], (err) => {
+                  if (err) reject(err);
+                });
               });
               resolve({ id: invoiceId });
             }

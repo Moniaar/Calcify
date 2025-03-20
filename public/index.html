@@ -291,9 +291,17 @@
                               if (customerName) {
                                 window.api.send('open-client-balance-window', customerName);
                                 e.target.value = ''; // Reset dropdown
-                              }
+                                ['addInvoiceBtn', 'addProductBtn', 'viewProductsBtn', 'viewInvoicesBtn'].forEach(id => {
+                                  const btn = document.getElementById(id);
+                                  if (btn) {
+                                    btn.addEventListener('click', () => window.api.send(`open-${id.replace('Btn', '').toLowerCase()}`));
+                                    } else {
+                                      console.error(`${id} not found`);
+                                    }
+                                  });
+                                }
+                              });
                             });
-                          });
                         </script>
                     </div>
                   </ul>

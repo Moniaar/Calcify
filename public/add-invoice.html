@@ -245,31 +245,31 @@
     });
 
     document.getElementById('saveBtn').addEventListener('click', () => {
-      console.log('Save Invoice clicked');
-      const invoice = {
-        customer: document.getElementById('customer').value,
-        sales_representative: document.getElementById('salesRepresentative').value,
-        date: document.getElementById('date').value,
-        invoice_number: document.getElementById('invoiceNumber').value,
-        invoice_type: document.getElementById('invoiceType').value,
-        payment_method: document.getElementById('paymentMethod').value,
-        bank_name: document.getElementById('bankName').value || null,
-        discount: parseFloat(document.getElementById('discount').value) || 0,
-        paid_amount: parseFloat(document.getElementById('paidAmount').value) || 0,
-        items: Array.from(document.querySelectorAll('.item')).map(item => ({
-          productId: item.querySelector('.product-select').value,
-          quantity: parseInt(item.querySelector('.quantity').value, 10),
-          unit: item.querySelector('.unit').value
-        })),
-        total: parseFloat(document.getElementById('reviewTotal').textContent)
-      };
-      window.api.addInvoice(invoice)
-        .then(() => {
-          console.log('Invoice saved');
-          window.close();
-        })
-        .catch(err => console.error('Error adding invoice:', err));
-    });
+  console.log('Save Invoice clicked');
+  const invoice = {
+    customer: document.getElementById('customer').value,
+    sales_representative: document.getElementById('salesRepresentative').value,
+    date: document.getElementById('date').value,
+    invoice_number: document.getElementById('invoiceNumber').value,
+    invoice_type: document.getElementById('invoiceType').value,
+    payment_method: document.getElementById('paymentMethod').value,
+    bank_name: document.getElementById('bankName').value || null,
+    discount: parseFloat(document.getElementById('discount').value) || 0,
+    paid_amount: parseFloat(document.getElementById('paidAmount').value) || 0, // This should be here
+    items: Array.from(document.querySelectorAll('.item')).map(item => ({
+      productId: item.querySelector('.product-select').value,
+      quantity: parseInt(item.querySelector('.quantity').value, 10),
+      unit: item.querySelector('.unit').value
+    })),
+    total: parseFloat(document.getElementById('reviewTotal').textContent)
+  };
+  window.api.invoke('add-invoice', invoice) // Changed to invoke for consistency
+    .then(() => {
+      console.log('Invoice saved');
+      window.close();
+    })
+    .catch(err => console.error('Error adding invoice:', err));
+});
 
     document.getElementById('printInvoiceBtn').addEventListener('click', () => {
       console.log('Print Invoice clicked');

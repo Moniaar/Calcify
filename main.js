@@ -52,6 +52,7 @@ function createMainWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
+      enableRemoteModule: false,
       nodeIntegration: false,
     },
   });
@@ -177,10 +178,12 @@ ipcMain.handle('fetch-product-by-id', async (event, id) => backend.fetchProductB
 ipcMain.handle('fetch-invoices', async () => backend.fetchInvoices());
 
 ipcMain.handle('add-invoice', async (event, invoice) => {
-  const result = await backend.addInvoice(invoice);
-  if (mainWindow) mainWindow.webContents.send('invoice-added');
-  if (invoicesTableWindow) invoicesTableWindow.webContents.send('invoice-added');
-  return result;
+  try {
+    return await backend.addInvoice(invoice);
+  } catch (err) {
+    console.error('Add invoice error:', err);
+    throw err;
+  }
 });
 
 ipcMain.handle('delete-invoice', async (event, id) => {
