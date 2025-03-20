@@ -141,9 +141,15 @@ function createBackend(db) {
     },
     fetchSalesTotal: () => {
       return new Promise((resolve, reject) => {
-        db.get('SELECT SUM(total) as total FROM invoices', (err, row) => {
-          if (err) reject(err);
-          else resolve(row.total || 0);
+        db.get('SELECT SUM(total) as totalSales FROM invoices', [], (err, row) => {
+          if (err) {
+            console.error('DB: Error fetching sales total:', err);
+            reject(err);
+          } else {
+            const total = row.totalSales || 0;
+            console.log('DB: Sales total calculated:', total);
+            resolve(total);
+          }
         });
       });
     },

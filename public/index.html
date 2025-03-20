@@ -381,17 +381,37 @@
                 </div>
               </div>
               <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                  // Load Total Balance
-                  window.api.invoke('fetch-total-balance')
-                    .then(balance => {
-                      document.getElementById('totalBalance').textContent = `${balance.toFixed(2)} SDG`;
+                function updateSalesTotal() {
+                  console.log('Fetching sales total...');
+                  window.api.invoke('fetch-sales-total')
+                    .then((total) => {
+                      console.log('Sales total received:', total);
+                      const salesTotalElement = document.getElementById('salesTotal');
+                      if (salesTotalElement) {
+                        salesTotalElement.textContent = `$${total.toFixed(2)}`;
+                        console.log('Sales total updated to:', total);
+                      } else {
+                        console.error('salesTotal element not found');
+                      }
                     })
-                    .catch(err => {
-                      console.error('Error fetching balance:', err);
-                      document.getElementById('totalBalance').textContent = 'Error';
-                    });
+                    .catch((err) => console.error('Error fetching sales total:', err));
+                }
+              
+                document.addEventListener('DOMContentLoaded', () => {
+                  console.log('DOM loaded, updating sales...');
+                  updateSalesTotal();
+              
+                  // Update on invoice addition
+                  window.api.on('invoice-added', () => {
+                    console.log('Invoice added, updating sales...');
+                    updateSalesTotal();
                   });
+              
+                  // Existing button listeners...
+                  document.getElementById('addInvoiceBtn')?.addEventListener('click', () => {
+                    window.api.send('open-add-invoice');
+                  });
+                });
               </script>
               <div class="col-sm-6 col-md-3">
                 <div class="card card-stats card-round">
