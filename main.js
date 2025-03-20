@@ -250,3 +250,11 @@ ipcMain.on('open-invoices-table-window', () => {
 ipcMain.on('open-edit-invoice-window', (event, id) => {
   if (!editInvoiceWindow) createEditInvoiceWindow(id);
 });
+
+ipcMain.handle('fetch-weekly-sales-total', async (event, { start, end }) => {
+  return await backend.fetchWeeklySalesTotal(start, end);
+});
+
+ipcMain.handle('fetch-weekly-sales-by-day', async (event, { start, end }) => {
+  return await backend.fetchWeeklySalesByDay(start, end);
+});

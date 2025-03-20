@@ -187,6 +187,43 @@ function createBackend(db) {
       });
     },
 
+    fetchWeeklySalesTotal: (start, end) => {
+      return new Promise((resolve, reject) => {
+        db.get(
+          'SELECT SUM(total) as weeklyTotal FROM invoices WHERE date >= ? AND date <= ?',
+          [start, end],
+          (err, row) => {
+            if (err) reject(err);
+            else resolve(row.weeklyTotal || 0);
+          }
+        );
+      });
+    },
+
+    fetchWeeklySalesByDay: (start, end) => {
+      return new Promise((resolve, reject) => {
+        db.all(
+          'SELECT date, SUM(total) as dailyTotal FROM invoices WHERE date >= ? AND date <= ? GROUP BY date ORDER BY date ASC',
+          [start, end],
+          (err, rows) => {
+            if (err) reject(err);
+            else {
+              const startDate = new Date(start);
+              const salesByDay = Array(7).fill(0);
+              rows.forEach(row => {
+                const rowDate = new Date(row.date);
+                const dayIndex = Math.floor((rowDate - startDate) / (1000 * 60 * 60 * 24));
+                if (dayIndex >= 0 && dayIndex < 7) {
+                  salesByDay[dayIndex] = row.dailyTotal;
+                }
+              });
+              resolve(salesByDay);
+            }
+          }
+        );
+      });
+    },
+
     fetchCustomers: () => {
       return new Promise((resolve, reject) => {
         db.all('SELECT DISTINCT customer FROM invoices', [], (err, rows) => {

@@ -521,6 +521,79 @@
                   </div>
                 </div>
               </div>
+              <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Helper to get the start and end of the current week (Sunday-Saturday)
+  function getWeekRange() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - dayOfWeek); // Set to Sunday
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // Set to Saturday
+
+    const formatDate = (date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return {
+      start: startOfWeek,
+      end: endOfWeek,
+      label: `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}`
+    };
+  }
+
+  function updateWeeklySales() {
+    const { start, end, label } = getWeekRange();
+    document.getElementById('weekRange').textContent = label;
+
+    // Fetch weekly sales total
+    window.api.invoke('fetch-weekly-sales-total', { start: start.toISOString(), end: end.toISOString() })
+      .then((total) => {
+        document.getElementById('weeklySalesTotal').textContent = `$${total.toFixed(2)}`;
+      })
+      .catch((err) => console.error('Error fetching weekly sales total:', err));
+
+    // Fetch daily breakdown for chart
+    window.api.invoke('fetch-weekly-sales-by-day', { start: start.toISOString(), end: end.toISOString() })
+      .then((salesByDay) => {
+        const labels = Array(7).fill(0).map((_, i) => {
+          const date = new Date(start);
+          date.setDate(start.getDate() + i);
+          return date.toLocaleDateString('en-US', { weekday: 'short' });
+        });
+        const data = labels.map((_, i) => salesByDay[i] || 0);
+
+        const ctx = document.getElementById('weeklySalesChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels, // e.g., ['Sun', 'Mon', 'Tue', ...]
+            datasets: [{
+              label: 'Weekly Sales',
+              data: data, // Daily totals
+              borderColor: '#007bff',
+              fill: false,
+            }],
+          },
+          options: {
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { display: false } }
+          }
+        });
+      })
+      .catch((err) => console.error('Error fetching weekly sales by day:', err));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateWeeklySales();
+
+    // Existing functions (updateProductCount, etc.) here...
+
+    // Update sales when a new invoice is added
+    window.api.on('invoice-added', () => {
+      updateWeeklySales();
+      // Call other update functions as needed
+    });
+  });
+</script>
               <!-- Add spacing before map -->
               <div class="page-category mt-4 mb-4">Help users find your address.</div>
               <div class="row">
