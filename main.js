@@ -156,12 +156,14 @@ app.on('window-all-closed', () => {
 // IPC handlers
 
 ipcMain.handle('fetch-products', async () => backend.fetchProducts());
+
 ipcMain.handle('add-product', async (event, product) => {
   const result = await backend.addProduct(product);
   if (mainWindow) mainWindow.webContents.send('product-added');
   if (productsTableWindow) productsTableWindow.webContents.send('product-added');
   return result;
 });
+
 ipcMain.handle('delete-product', async (event, id) => {
   const result = await backend.deleteProduct(id);
   if (mainWindow) mainWindow.webContents.send('product-added');
@@ -178,12 +180,9 @@ ipcMain.handle('fetch-product-by-id', async (event, id) => backend.fetchProductB
 ipcMain.handle('fetch-invoices', async () => backend.fetchInvoices());
 
 ipcMain.handle('add-invoice', async (event, invoice) => {
-  try {
-    return await backend.addInvoice(invoice);
-  } catch (err) {
-    console.error('Add invoice error:', err);
-    throw err;
-  }
+  const result = await backend.addInvoice(invoice);
+  mainWindow.webContents.send('invoice-added'); // Notify main window
+  return result;
 });
 
 ipcMain.handle('delete-invoice', async (event, id) => {
