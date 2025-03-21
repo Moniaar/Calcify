@@ -341,58 +341,6 @@
                   <div class="card-body">
                     <div class="row align-items-center">
                       <div class="col-icon">
-                        <div class="icon-big text-center icon-success bubble-shadow-small">
-                          <i class="fas fa-luggage-cart"></i>
-                        </div>
-                      </div>
-                      <div class="col col-stats ms-3 ms-sm-0">
-                        <div class="numbers">
-                          <p class="card-category">Sales</p>
-                          <h4 class="weeklySalesTotal" id="salesTotal">$0.00</h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <script>
-                function updateSalesTotal() {
-                  console.log('Fetching sales total...');
-                  window.api.invoke('fetch-sales-total')
-                    .then((total) => {
-                      console.log('Sales total received:', total);
-                      const salesTotalElement = document.getElementById('salesTotal');
-                      if (salesTotalElement) {
-                        salesTotalElement.textContent = `$${total.toFixed(2)}`;
-                        console.log('Sales total updated to:', total);
-                      } else {
-                        console.error('salesTotal element not found');
-                      }
-                    })
-                    .catch((err) => console.error('Error fetching sales total:', err));
-                }
-              
-                document.addEventListener('DOMContentLoaded', () => {
-                  console.log('DOM loaded, updating sales...');
-                  updateSalesTotal();
-              
-                  // Update on invoice addition
-                  window.api.on('invoice-added', () => {
-                    console.log('Invoice added, updating sales...');
-                    updateSalesTotal();
-                  });
-              
-                  // Existing button listeners...
-                  document.getElementById('addInvoiceBtn')?.addEventListener('click', () => {
-                    window.api.send('open-add-invoice');
-                  });
-                });
-              </script>
-              <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
-                  <div class="card-body">
-                    <div class="row align-items-center">
-                      <div class="col-icon">
                         <div class="icon-big text-center icon-info bubble-shadow-small">
                           <i class="fas fa-user-check"></i>
                         </div>
