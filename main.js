@@ -184,6 +184,27 @@ function createLoginWindow() {
   });
 }
 
+let calendarWindow;
+function createCalendarWindow() {
+  calendarWindow = new BrowserWindow({
+    width: 500,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      enableRemoteModule: false,
+      nodeIntegration: false,
+    },
+  });
+  calendarWindow.loadFile('public/calendar.html')
+    .then(() => console.log('Main: calendar.html loaded successfully'))
+    .catch(err => console.error('Main: Error loading calendar.html:', err));
+  calendarWindow.on('closed', () => {
+    console.log('Main: Calendar window closed');
+    calendarWindow = null;
+  });
+}
+
 app.whenReady().then(() => {
   initializeDatabase();
   createLoginWindow();
@@ -340,4 +361,7 @@ ipcMain.on('open-invoices-table-window', () => {
 });
 ipcMain.on('open-edit-invoice-window', (event, id) => {
   if (!editInvoiceWindow) createEditInvoiceWindow(id);
+});
+ipcMain.on('open-calendar-window', () => {
+  if (!calendarWindow) createCalendarWindow();
 });

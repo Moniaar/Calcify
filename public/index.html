@@ -12,6 +12,7 @@
       href="assets/img/kaiadmin/favicon.ico"
       type="image/x-icon"
     />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 
     <!-- Fonts and icons -->
     <script src="assets/js/plugin/webfont/webfont.min.js"></script>
@@ -196,14 +197,14 @@
                     <div class="quick-actions-scroll scrollbar-outer">
                       <div class="quick-actions-items">
                         <div class="row m-0">
-                          <a class="col-6 col-md-4 p-0" href="#">
-                            <div class="quick-actions-item">
+                          <div class="col-6 col-md-4 p-0">
+                            <div class="quick-actions-item" id="calendarAction">
                               <div class="avatar-item bg-danger rounded-circle">
                                 <i class="far fa-calendar-alt"></i>
                               </div>
                               <span class="text">Calendar</span>
                             </div>
-                          </a>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -414,6 +415,12 @@
             });
             document.getElementById('viewInvoicesBtn').addEventListener('click', () => {
               window.api.openInvoicesTableWindow();
+            });
+
+            document.getElementById('calendarAction')?.addEventListener('click', (e) => {
+              e.preventDefault(); // Prevent default anchor behavior
+              console.log('Calendar action clicked');
+              window.api.send('open-calendar-window');
             });
         
             window.api.onProductAdded(() => updateProductCount());
