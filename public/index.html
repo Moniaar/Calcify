@@ -48,7 +48,7 @@
           <div class="logo-header" data-background-color="dark">
             <a href="index.html" class="logo">
               <img
-                src="assets/img/kaiadmin/3.png"
+                src="assets/img/kaiadmin/Calcify logo.png"
                 alt="navbar brand"
                 class="navbar-brand"
                 height="20"
@@ -66,6 +66,32 @@
               <i class="gg-more-vertical-alt"></i>
             </button>
           </div>
+          <style>
+            .main-container { min-height: 100vh; padding-bottom: 50px; }
+            .logo-header {
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              padding: 0px;
+              height: 84px;
+              width: 100%;
+            }
+            .logo {
+              flex-grow: 1;
+              display: flex;
+              align-items: center;
+            }
+            .navbar-brand {
+              width: 100%;
+              height: auto;
+              max-height: 100%;
+              object-fit: contain;
+            }
+            .nav-toggle,
+            .topbar-toggler {
+              flex-shrink: 0;
+            }
+          </style>
 
           <!-- End Logo Header -->
         </div>
@@ -148,12 +174,35 @@
             </div>
             <!-- End Logo Header -->
           </div>
-          <!-- Navbar Header -->
-          <nav
+            <!-- Navbar Header -->
+            <nav
             class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
-          >
+            >
             <div class="container-fluid">
-
+              <!-- Calendar Integrated Here -->
+              <div class="calendar">
+                <h2>Developer's Calendar - 2025</h2>
+                <div class="controls">
+                  <select id="monthSelect">
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                  </select>
+                  <button id="resetCalendar">Reset Calendar</button>
+                </div>
+                <div class="calendar-grid">
+                  <!-- Calendar days will be generated here -->
+                </div>
+              </div>
               <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
                 <li
                   class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none"
@@ -179,37 +228,256 @@
                       </div>
                     </form>
                   </ul>
-                </li>  
-                <li class="nav-item topbar-icon dropdown hidden-caret">
-                  <a
-                    class="nav-link"
-                    data-bs-toggle="dropdown"
-                    href="#"
-                    aria-expanded="false"
-                  >
-                    <i class="fas fa-layer-group"></i>
-                  </a>
-                  <div class="dropdown-menu quick-actions animated fadeIn">
-                    <div class="quick-actions-header">
-                      <span class="title mb-1">Quick Actions</span>
-                      <span class="subtitle op-7">Shortcuts</span>
-                    </div>
-                    <div class="quick-actions-scroll scrollbar-outer">
-                      <div class="quick-actions-items">
-                        <div class="row m-0">
-                          <div class="col-6 col-md-4 p-0">
-                            <div class="quick-actions-item" id="calendarAction">
-                              <div class="avatar-item bg-danger rounded-circle">
-                                <i class="far fa-calendar-alt"></i>
-                              </div>
-                              <span class="text">Calendar</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </li>
+                <style>
+                  .calendar {
+                    width: 100%;
+                    max-width: 400px; /* Smaller to fit navbar */
+                    text-align: center;
+                    background: #fff;
+                    border-radius: 5px;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                    padding: 10px;
+                    margin-left: auto; /* Push to right side */
+                  }
+                  .calendar h2 {
+                    font-size: 1.2em; /* Smaller header */
+                    margin-bottom: 0.5em;
+                  }
+                  .controls {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 10px;
+                  }
+                  #monthSelect {
+                    font-size: 0.8em;
+                    padding: 5px 8px;
+                    border-radius: 3px;
+                    border: 1px solid #ddd;
+                    background: #f7f9fc;
+                    color: #333;
+                    outline: none;
+                  }
+                  #resetCalendar {
+                    background-color: #ff6b6b;
+                    color: #fff;
+                    border: none;
+                    padding: 5px 8px;
+                    border-radius: 3px;
+                    font-size: 0.8em;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                  }
+                  #resetCalendar:hover {
+                    background-color: #ff5252;
+                  }
+                  .calendar-grid {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: 4px;
+                  }
+                  .day {
+                    padding: 8px;
+                    background-color: #f0f3f7;
+                    color: #333;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    transition: background-color 0.2s;
+                    min-height: 40px; /* Smaller days */
+                    position: relative;
+                    font-size: 0.7em;
+                  }
+                  .day:hover {
+                    background-color: #e0e6ef;
+                  }
+                  .note {
+                    font-size: 0.6em;
+                    margin-top: 3px;
+                    color: #555;
+                  }
+                  .note-entry {
+                    border-top: 1px solid #ddd;
+                    padding-top: 3px;
+                    margin-top: 3px;
+                  }
+                  .modal {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.4);
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1000; /* Ensure it’s above navbar */
+                  }
+                  .modal-content {
+                    background-color: #fff;
+                    padding: 15px;
+                    border-radius: 5px;
+                    width: 90%;
+                    max-width: 250px; /* Smaller modal */
+                    text-align: left;
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                  }
+                  .close {
+                    font-size: 1.2em;
+                    cursor: pointer;
+                    color: #888;
+                    float: right;
+                  }
+                  .close:hover {
+                    color: #555;
+                  }
+                  textarea,
+                  input[type="time"] {
+                    width: 100%;
+                    padding: 8px;
+                    margin-top: 8px;
+                    border: 1px solid #ddd;
+                    border-radius: 3px;
+                    font-size: 0.8em;
+                  }
+                  #saveNote {
+                    background-color: #4caf50;
+                    color: white;
+                    padding: 8px;
+                    margin-top: 10px;
+                    border: none;
+                    cursor: pointer;
+                    width: 100%;
+                    border-radius: 3px;
+                    font-size: 0.9em;
+                    transition: background-color 0.2s;
+                  }
+                  #saveNote:hover {
+                    background-color: #43a047;
+                  }
+                </style>
+                <!-- Modal for adding notes -->
+    <div id="noteModal" class="modal">
+      <div class="modal-content">
+        <span class="close">×</span>
+        <h3>Add Note</h3>
+        <p id="selectedDate"></p>
+        <label for="time">Select Time:</label>
+        <input type="time" id="time" required>
+        <label for="note">Note:</label>
+        <textarea id="note" rows="2" placeholder="Enter your note..."></textarea>
+        <button id="saveNote">Save Note</button>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // Calendar JavaScript
+        const calendarGrid = document.querySelector(".calendar-grid");
+        const noteModal = document.getElementById("noteModal");
+        const closeModal = document.querySelector(".close");
+        const selectedDateEl = document.getElementById("selectedDate");
+        const timeInput = document.getElementById("time");
+        const noteInput = document.getElementById("note");
+        const saveNoteBtn = document.getElementById("saveNote");
+        const resetBtn = document.getElementById("resetCalendar");
+        const monthSelect = document.getElementById("monthSelect");
+        let currentMonth = 0;
+        const notes = {};
+  
+        function daysInMonth(month, year) {
+          return new Date(year, month + 1, 0).getDate();
+        }
+  
+        function renderCalendar(month) {
+          calendarGrid.innerHTML = "";
+          const days = daysInMonth(month, 2025);
+  
+          for (let i = 1; i <= days; i++) {
+            const day = document.createElement("div");
+            day.classList.add("day");
+            day.textContent = i;
+            day.setAttribute("data-day", i);
+  
+            const noteDisplay = document.createElement("div");
+            noteDisplay.classList.add("note");
+            day.appendChild(noteDisplay);
+  
+            day.addEventListener("click", () => openModal(month, i));
+            calendarGrid.appendChild(day);
+  
+            if (notes[`${month}-${i}`]) {
+              updateNotesDisplay(month, i);
+            }
+          }
+        }
+  
+        function openModal(month, day) {
+          selectedDateEl.textContent = `Day: ${day}, ${monthSelect.options[month].text}`;
+          timeInput.value = "";
+          noteInput.value = "";
+  
+          noteModal.style.display = "flex";
+          saveNoteBtn.onclick = () => saveNote(month, day);
+        }
+  
+        function closeModalFunc() {
+          noteModal.style.display = "none";
+        }
+  
+        function saveNote(month, day) {
+          const time = timeInput.value;
+          const noteText = noteInput.value;
+          const key = `${month}-${day}`;
+  
+          if (time && noteText) {
+            if (!notes[key]) notes[key] = [];
+            notes[key].push({ time, text: noteText });
+  
+            updateNotesDisplay(month, day);
+            closeModalFunc();
+          } else {
+            alert("Please fill out both time and note.");
+          }
+        }
+  
+        function updateNotesDisplay(month, day) {
+          const key = `${month}-${day}`;
+          const dayCell = document.querySelector(`.day[data-day='${day}'] .note`);
+          dayCell.innerHTML = "";
+  
+          notes[key].forEach((note, index) => {
+            const noteEntry = document.createElement("div");
+            noteEntry.classList.add("note-entry");
+            noteEntry.textContent = `🕒 ${note.time} - ${note.text}`;
+            if (index > 0) noteEntry.style.borderTop = "1px solid #ddd";
+            dayCell.appendChild(noteEntry);
+          });
+        }
+  
+        function resetCalendar() {
+          for (let key in notes) delete notes[key];
+          renderCalendar(currentMonth);
+        }
+  
+        resetBtn.addEventListener("click", resetCalendar);
+        monthSelect.addEventListener("change", (e) => {
+          currentMonth = parseInt(e.target.value);
+          renderCalendar(currentMonth);
+        });
+  
+        closeModal.addEventListener("click", closeModalFunc);
+        window.addEventListener("click", (event) => {
+          if (event.target == noteModal) closeModalFunc();
+        });
+  
+        renderCalendar(currentMonth);
+  
+        // Existing button listeners (add your own here)
+        document.getElementById('addInvoiceBtn')?.addEventListener('click', () => {
+          window.api.send('open-add-invoice-window');
+        });
+      });
+      </script>
 
                 <li class="nav-item topbar-user dropdown hidden-caret">
                   <a
