@@ -114,16 +114,19 @@
 
     <div id="printInvoiceSection" class="hidden">
       <div style="text-align: right;">
-        <img src="assets/img/kaiadmin/3.png" alt="Company Logo" style="width: 100px; height: auto;">
-        <h4>[Pharmacy Name]</h4>
-        <p>[Pharmacy Address]</p>
+        <img src="assets/img/kaiadmin/Invoice logo.png" alt="Invoice Logo" class="img-fluid" style="width: 100px; height: 100px;">
+        <h4>OBIMED</h4>
+        <p>حلفا الجديدة - غرب طلمبة قادرة مربع 5</p>
+        <p>Jawaher402@gmail.com</p>
+        <p><strong>Invoice to:</strong> <span id="printSalesRepresentative"></span></p>
+        <p><span id="printCustomer"></span></p>
       </div>
       <div style="text-align: left;">
-        <h3>فاتورة</h3>
-        <p><strong>رقم الفاتورة:</strong> <span id="printInvoiceNumber"></span></p>
-        <p><strong>تاريخ الطباعة:</strong> <span id="printDateIssued"></span></p>
-        <p><strong>تاريخ الإصدار:</strong> <span id="printIssueDate"></span></p>
-        <p><strong>تاريخ المطالبة:</strong> <span id="printClaimDate"></span></p>
+        <h3 style="display: flex;">فاتورة</h3>
+        <p><strong>Invoice Number</strong> <span id="printInvoiceNumber"></span></p>
+        <p><strong>Print issued</strong> <span id="printDateIssued"></span></p>
+        <p><strong>Invoice issued</strong> <span id="printIssueDate"></span></p>
+        <p><strong>Claim Date</strong> <span id="printClaimDate"></span></p>
       </div>
       <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
         <thead>
@@ -245,36 +248,38 @@
     });
 
     document.getElementById('saveBtn').addEventListener('click', () => {
-  console.log('Save Invoice clicked');
-  const invoice = {
-    customer: document.getElementById('customer').value,
-    sales_representative: document.getElementById('salesRepresentative').value,
-    date: document.getElementById('date').value,
-    invoice_number: document.getElementById('invoiceNumber').value,
-    invoice_type: document.getElementById('invoiceType').value,
-    payment_method: document.getElementById('paymentMethod').value,
-    bank_name: document.getElementById('bankName').value || null,
-    discount: parseFloat(document.getElementById('discount').value) || 0,
-    paid_amount: parseFloat(document.getElementById('paidAmount').value) || 0, // This should be here
-    items: Array.from(document.querySelectorAll('.item')).map(item => ({
-      productId: item.querySelector('.product-select').value,
-      quantity: parseInt(item.querySelector('.quantity').value, 10),
-      unit: item.querySelector('.unit').value
-    })),
-    total: parseFloat(document.getElementById('reviewTotal').textContent)
-  };
-  window.api.invoke('add-invoice', invoice) // Changed to invoke for consistency
-    .then(() => {
-      console.log('Invoice saved');
-      window.close();
-    })
-    .catch(err => console.error('Error adding invoice:', err));
-});
+      console.log('Save Invoice clicked');
+      const invoice = {
+        customer: document.getElementById('customer').value,
+        sales_representative: document.getElementById('salesRepresentative').value,
+        date: document.getElementById('date').value,
+        invoice_number: document.getElementById('invoiceNumber').value,
+        invoice_type: document.getElementById('invoiceType').value,
+        payment_method: document.getElementById('paymentMethod').value,
+        bank_name: document.getElementById('bankName').value || null,
+        discount: parseFloat(document.getElementById('discount').value) || 0,
+        paid_amount: parseFloat(document.getElementById('paidAmount').value) || 0,
+        items: Array.from(document.querySelectorAll('.item')).map(item => ({
+          productId: item.querySelector('.product-select').value,
+          quantity: parseInt(item.querySelector('.quantity').value, 10),
+          unit: item.querySelector('.unit').value
+        })),
+        total: parseFloat(document.getElementById('reviewTotal').textContent)
+      };
+      window.api.invoke('add-invoice', invoice)
+        .then(() => {
+          console.log('Invoice saved');
+          window.close();
+        })
+        .catch(err => console.error('Error adding invoice:', err));
+    });
 
     document.getElementById('printInvoiceBtn').addEventListener('click', () => {
       console.log('Print Invoice clicked');
       const invoiceNumber = document.getElementById('invoiceNumber').value;
       const issueDate = document.getElementById('date').value;
+      const salesRepresentative = document.getElementById('salesRepresentative').value;
+      const customer = document.getElementById('customer').value;
       const printDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       const claimingDate = new Date(new Date(issueDate).setDate(new Date(issueDate).getDate() + 30)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       const discount = parseFloat(document.getElementById('discount').value) || 0;
@@ -307,6 +312,8 @@
         document.getElementById('printDateIssued').textContent = printDate;
         document.getElementById('printIssueDate').textContent = issueDate;
         document.getElementById('printClaimDate').textContent = claimingDate;
+        document.getElementById('printSalesRepresentative').textContent = salesRepresentative;
+        document.getElementById('printCustomer').textContent = customer;
         const printItems = document.getElementById('printItems');
         printItems.innerHTML = '';
         items.forEach(item => {
