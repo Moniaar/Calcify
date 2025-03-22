@@ -179,30 +179,43 @@
             class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
             >
             <div class="container-fluid">
-              <!-- Calendar Integrated Here -->
-              <div class="calendar">
-                <h2>Developer's Calendar - 2025</h2>
-                <div class="controls">
-                  <select id="monthSelect">
-                    <option value="0">January</option>
-                    <option value="1">February</option>
-                    <option value="2">March</option>
-                    <option value="3">April</option>
-                    <option value="4">May</option>
-                    <option value="5">June</option>
-                    <option value="6">July</option>
-                    <option value="7">August</option>
-                    <option value="8">September</option>
-                    <option value="9">October</option>
-                    <option value="10">November</option>
-                    <option value="11">December</option>
-                  </select>
-                  <button id="resetCalendar">Reset Calendar</button>
-                </div>
-                <div class="calendar-grid">
-                  <!-- Calendar days will be generated here -->
-                </div>
-              </div>
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-icon dropdown hidden-caret calendar-dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    role="button"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                  >
+                    <img src="assets/img/calendar-icon.png" alt="Calendar" class="calendar-icon" />
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-end animated fadeIn">
+                    <div class="calendar">
+                      <h2>Developer's Calendar - 2025</h2>
+                      <div class="controls">
+                        <select id="monthSelect">
+                          <option value="0">January</option>
+                          <option value="1">February</option>
+                          <option value="2">March</option>
+                          <option value="3">April</option>
+                          <option value="4">May</option>
+                          <option value="5">June</option>
+                          <option value="6">July</option>
+                          <option value="7">August</option>
+                          <option value="8">September</option>
+                          <option value="9">October</option>
+                          <option value="10">November</option>
+                          <option value="11">December</option>
+                        </select>
+                        <button id="resetCalendar">Reset Calendar</button>
+                      </div>
+                      <div class="calendar-grid">
+                        <!-- Calendar days will be generated here -->
+                      </div>
+                    </div>
+                  </div>
               <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
                 <li
                   class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none"
@@ -230,6 +243,14 @@
                   </ul>
                 </li>
                 <style>
+                  /* Calendar Dropdown Styles */
+                  .calendar-dropdown .dropdown-menu {
+                    width: 400px; /* Fixed width for dropdown */
+                    padding: 10px;
+                    background: #fff;
+                    border-radius: 5px;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                  }
                   .calendar {
                     width: 100%;
                     max-width: 400px; /* Smaller to fit navbar */
@@ -354,6 +375,11 @@
                   }
                   #saveNote:hover {
                     background-color: #43a047;
+                  }
+                  .calendar-icon {
+                    height: 24px; /* Adjust size as needed */
+                    width: auto;
+                    cursor: pointer;
                   }
                 </style>
                 <!-- Modal for adding notes -->
