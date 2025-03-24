@@ -5,7 +5,9 @@
   "main": "main.js",
   "productName": "Pharmacy POS",
   "identifier": "com.obimed.pharmacypos",
-  "build": "ObiMed",
+  "build": {
+    "appId": "ObiMed"
+  },
   "scripts": {
     "start": "ELECTRON_ENABLE_LOGGING=0 electron --no-sandbox .",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -23,7 +25,7 @@
   "homepage": "https://github.com/Moniaar/Calcify#readme",
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "electron": "^35.0.1",
+    "electron": "^35.0.3",
     "electron-builder": "^25.1.8",
     "nodemon": "^3.1.9"
   },
