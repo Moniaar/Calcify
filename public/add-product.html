@@ -1,55 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Add Product</title>
+  <title>Products</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
   <div class="container mt-4">
-    <h3>Add New Product</h3>
-    <form id="addProductForm">
-      <div class="mb-3">
-        <label for="name" class="form-label">Product Name</label>
-        <input type="text" class="form-control" id="name" required>
-      </div>
-      <div class="mb-3">
-        <label for="price" class="form-label">Price ($)</label>
-        <input type="number" class="form-control" id="price" step="0.01" min="0" required>
-      </div>
-      <div class="mb-3">
-        <label for="cost" class="form-label">Cost ($)</label>
-        <input type="number" class="form-control" id="cost" step="0.01" min="0" required>
-      </div>
-      <div class="mb-3">
-        <label for="stock" class="form-label">Stock</label>
-        <input type="number" class="form-control" id="stock" min="0" required>
-      </div>
-      <div class="mb-3">
-        <label for="storageLocation" class="form-label">Storage Location</label>
-        <select class="form-select" id="storageLocation" required>
-          <option value="">Select Storage Location</option>
-          <option value="Medical Supplements">Medical Supplements</option>
-          <option value="Laboratory Supplements">Laboratory Supplements</option>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary">Add Product</button>
-    </form>
+    <h3>Add Products</h3>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Price ($)</th>
+          <th>Cost ($)</th>
+          <th>Stock</th>
+          <th>Storage Location</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="productsTable"></tbody>
+    </table>
+    <button class="btn btn-primary" id="addProductBtn">Add Product</button>
   </div>
 
   <script>
-    document.getElementById('addProductForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const product = {
-        name: document.getElementById('name').value,
-        price: parseFloat(document.getElementById('price').value),
-        cost: parseFloat(document.getElementById('cost').value),
-        stock: parseInt(document.getElementById('stock').value, 10),
-        storage_location: document.getElementById('storageLocation').value
-      };
-      window.api.addProduct(product)
-        .then(() => window.close())
-        .catch((err) => console.error('Error adding product:', err));
+    function loadProducts() {
+      window.api.fetchProducts()
+        .then(products => {
+          const tbody = document.getElementById('productsTable');
+          tbody.innerHTML = '';
+          products.forEach(product => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${product.id}</td>
+              <td>${product.name}</td>
+              <td>${product.price.toFixed(2)}</td>
+              <td>${product.cost ? product.cost.toFixed(2) : 'N/A'}</td>
+              <td>${product.stock}</td>
+              <td>${product.storage_location}</td>
+              <td>
+                <button class="btn btn-sm btn-warning edit-btn" data-id="${product.id}">Edit</button>
+                <button class="btn btn-sm btn-danger delete-btn" data-id="${product.id}">Delete</button>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+
+          document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const id = btn.getAttribute('data-id');
+              window.api.send('open-edit-product-window', id);
+            });
+          });
+
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const id = btn.getAttribute('data-id');
+              window.api.deleteProduct(id).then(() => loadProducts());
+            });
+          });
+        })
+        .catch(err => console.error('Error loading products:', err));
+    }
+
+    document.getElementById('addProductBtn').addEventListener('click', () => {
+      window.api.send('open-add-product-window');
     });
+
+    loadProducts();
   </script>
 </body>
 </html>

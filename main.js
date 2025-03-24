@@ -27,6 +27,7 @@ function initializeDatabase() {
     "ALTER TABLE invoices ADD COLUMN bank_name TEXT",
     "ALTER TABLE invoices ADD COLUMN sales_representative TEXT",
     "ALTER TABLE products ADD COLUMN storage_location TEXT",
+    "ALTER TABLE products ADD COLUMN cost REAL",
     "ALTER TABLE invoices ADD COLUMN paid_amount REAL DEFAULT 0"
   ];
 

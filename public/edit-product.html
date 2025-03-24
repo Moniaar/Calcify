@@ -18,6 +18,10 @@
         <input type="number" class="form-control" id="price" step="0.01" min="0" required>
       </div>
       <div class="mb-3">
+        <label for="cost" class="form-label">Cost ($)</label>
+        <input type="number" class="form-control" id="cost" step="0.01" min="0" required>
+      </div>
+      <div class="mb-3">
         <label for="stock" class="form-label">Stock</label>
         <input type="number" class="form-control" id="stock" min="0" required>
       </div>
@@ -38,16 +42,15 @@
     const productId = urlParams.get('id');
 
     window.api.fetchProductById(productId)
-      .then((product) => {
-        if (product) {
-          document.getElementById('id').value = product.id;
-          document.getElementById('name').value = product.name;
-          document.getElementById('price').value = product.price;
-          document.getElementById('stock').value = product.stock;
-          document.getElementById('storageLocation').value = product.storage_location || '';
-        }
+      .then(product => {
+        document.getElementById('id').value = product.id;
+        document.getElementById('name').value = product.name;
+        document.getElementById('price').value = product.price;
+        document.getElementById('cost').value = product.cost || ''; // Default to empty if not set
+        document.getElementById('stock').value = product.stock;
+        document.getElementById('storageLocation').value = product.storage_location;
       })
-      .catch((err) => console.error('Error loading product:', err));
+      .catch(err => console.error('Error fetching product:', err));
 
     document.getElementById('editProductForm').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -55,12 +58,13 @@
         id: document.getElementById('id').value,
         name: document.getElementById('name').value,
         price: parseFloat(document.getElementById('price').value),
+        cost: parseFloat(document.getElementById('cost').value),
         stock: parseInt(document.getElementById('stock').value, 10),
         storage_location: document.getElementById('storageLocation').value
       };
       window.api.editProduct(product)
         .then(() => window.close())
-        .catch((err) => console.error('Error editing product:', err));
+        .catch(err => console.error('Error editing product:', err));
     });
   </script>
 </body>
