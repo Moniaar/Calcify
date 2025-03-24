@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS products (
   name TEXT NOT NULL,
   price REAL NOT NULL,
   stock INTEGER NOT NULL,
-  storage_location TEXT NOT NULL -- New column: "Medical Supplements" or "Laboratory Supplements"
+  storage_location TEXT NOT NULL -- New column: "Medical Supplements" or "Laboratory Supplements",
+  ALTER TABLE products ADD COLUMN cost REAL;
 );
 
 CREATE TABLE IF NOT EXISTS invoices (
