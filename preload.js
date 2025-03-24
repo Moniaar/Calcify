@@ -24,4 +24,7 @@ contextBridge.exposeInMainWorld('api', {
   send: (channel, data) => ipcRenderer.send(channel, data),
   invoke: (channel, data) => ipcRenderer.invoke(channel, data),
   on: (channel, func) => ipcRenderer.on(channel, (event, ...args) => func(...args)),
+  isOnline: () => navigator.onLine,
+  onOnline: (callback) => window.addEventListener('online', callback),
+  onOffline: (callback) => window.addEventListener('offline', callback),
 });

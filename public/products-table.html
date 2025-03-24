@@ -103,6 +103,11 @@
 
   <script>
     $(document).ready(function () {
+    if (!window.api.isOnline()) {
+      alert('You are offline. All operations will use local data.');
+    }
+  });
+    $(document).ready(function () {
       const table = $('#products-datatables').DataTable({
         dom: 'Bfrtip',
         buttons: [
