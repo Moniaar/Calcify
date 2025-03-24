@@ -10,11 +10,11 @@ function createBackend(db) {
         });
       });
     },
-    addProduct: ({ name, price, stock, storage_location }) => {
+    addProduct: ({ name, price, cost, stock, storage_location }) => {
       return new Promise((resolve, reject) => {
         db.run(
-          'INSERT INTO products (name, price, stock, storage_location) VALUES (?, ?, ?, ?)',
-          [name, price, stock, storage_location],
+          'INSERT INTO products (name, price, cost, stock, storage_location) VALUES (?, ?, ?, ?, ?)',
+          [name, price, cost, stock, storage_location],
           function (err) {
             if (err) reject(err);
             else resolve({ id: this.lastID });
@@ -30,11 +30,11 @@ function createBackend(db) {
         });
       });
     },
-    editProduct: ({ id, name, price, stock, storage_location }) => {
+    editProduct: ({ id, name, price, cost, stock, storage_location }) => {
       return new Promise((resolve, reject) => {
         db.run(
-          'UPDATE products SET name = ?, price = ?, stock = ?, storage_location = ? WHERE id = ?',
-          [name, price, stock, storage_location, id],
+          'UPDATE products SET name = ?, price = ?, cost = ?, stock = ?, storage_location = ? WHERE id = ?',
+          [name, price, cost, stock, storage_location, id],
           function (err) {
             if (err) reject(err);
             else resolve({ changes: this.changes });
