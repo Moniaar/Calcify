@@ -32,5 +32,9 @@ In next version I will update with the ability to backup automatically each 5min
 On app startup (app.whenReady): Initializes the sync setup and syncs from OneDrive to ensure the app uses the latest DB.
 On app close (before-quit): Syncs to OneDrive if mainWindow exists (post-login)
 
-
+## Useful commands:
+1. To delete the dist foler by force (the folder that shows after you build the app):
+```
+Remove-Item -Recurse -Force .\dist
+```
 
