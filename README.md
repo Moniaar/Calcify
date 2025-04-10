@@ -1,5 +1,5 @@
 # Calcify
-Pharmacy POS system using Electron.js for frontend and sqlite3 and Express for backend!. 
+Pharmacy POS system using Electron.js for frontend and sqlite3 for backend!. 
 
    ![icon](https://github.com/user-attachments/assets/f6f0bb7b-15a5-4d9d-a70f-4fa3db524906)
 
@@ -27,6 +27,10 @@ This project was designed to help a pharmacy track the following:
 4. In main.js, ipcRenderer isn’t available—it’s for the renderer process. This will cause a syntax error or runtime error (ipcRenderer is not defined).
 
 In next version I will update with the ability to backup automatically each 5min 😃. 
+
+### Integrated Sync Triggers:
+On app startup (app.whenReady): Initializes the sync setup and syncs from OneDrive to ensure the app uses the latest DB.
+On app close (before-quit): Syncs to OneDrive if mainWindow exists (post-login)
 
 
 
