@@ -13,7 +13,6 @@ This project was designed to help a pharmacy track the following:
 5. Creating stocks with a database for each product
 6. Medication database
 
-
 ---
 ## Things I have learned while building with Electron
 
